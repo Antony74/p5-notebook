@@ -1,0 +1,18 @@
+{
+  "name": "p5-notebook",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Antony74/p5-notebook.git"
+  },
+  "keywords": [],
+  "author": "Antony74",
+  "license": "MIT",
+  "homepage": "https://github.com/Antony74/p5-notebook#readme",
+  "dependencies": {
+    "starboard-notebook": "^0.15.7"
+  }
+}

@@ -2,7 +2,7 @@
   "name": "p5-notebook",
   "version": "1.0.0",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "parcel src/in-praise-of-the-map-function.html"
   },
   "repository": {
     "type": "git",
@@ -13,6 +13,8 @@
   "license": "MIT",
   "homepage": "https://github.com/Antony74/p5-notebook#readme",
   "dependencies": {
-    "starboard-notebook": "^0.15.7"
+    "parcel": "^2.9.3",
+    "starboard-notebook": "^0.15.7",
+    "starboard-wrap": "^0.4.1"
   }
 }

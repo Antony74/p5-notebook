@@ -1,8 +1,24 @@
-<script src="coi-serviceworker.js"></script>
+<head>
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.3/gh-fork-ribbon.min.css"
+    />
+</head>
+<body>
+    <a
+        class="github-fork-ribbon right-top"
+        href="https://github.com/Antony74/p5-notebook"
+        data-ribbon="Fork me on GitHub"
+        title="Fork me on GitHub"
+        >Fork me on GitHub</a
+    >
 
-<div id="mount-point"></div>
+    <script src="coi-serviceworker.js"></script>
 
-<script type="module">
-    import { loadNotebook } from './loadNotebook.js';
-    loadNotebook('in-praise-of-the-map-function.txt', 'mount-point');
-</script>
+    <div id="mount-point"></div>
+
+    <script type="module">
+        import { loadNotebook } from './loadNotebook.js';
+        loadNotebook('in-praise-of-the-map-function.txt', 'mount-point');
+    </script>
+</body>

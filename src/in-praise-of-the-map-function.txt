@@ -2,8 +2,8 @@
 # In praise of the map function
 This is my love letter to the p5 map function, which as [the help says](https://p5js.org/reference/#/p5/norm),
 re-maps a number from one range to another.  I think this is jolly useful, underated, and frees the creative
-coder from having think about the math, just "I want that range there", thus allowing us to focus on the
-creative part.
+coder from having think about the math.  We just have to think "I want that range there", and this frees us to
+focus on being creative.
 
 It's actually a fairly simple function, the heart of which can be implemented as follows:
 # %% [javascript]
@@ -43,4 +43,6 @@ var s = function( p ) { // p could be any variable name
     p.rect(x,y,50,50);
   };
 };
-var myp5 = new p5(s, 'c1');
+new p5WithCleanup(s, 'c1');
+# %% [html]
+<div id="c1"></div>

@@ -51,19 +51,151 @@ var assemblyLineSketch = p => {
     var stations = 3; // The number of stations in this production line
     var transits = stations + 2; // We want to see products moving between each station, plus on and off the screen
 
-/*
-  var drawGlasses = w => {
-    float w2 = w * 2;
-    float w3 = w * 3;
-    p.fill(255, 128);
-    p.stroke(0, 0, 0);
-    p.strokeWeight(5);
-    p.ellipse(-w, 0, w2, w2);
-    p.ellipse( w, 0, w2, w2);
-    p.line(-w2, 0, -w3, -w);
-    p.line( w2, 0,  w3, -w);
-  };
-*/
+    var boundedMap = (value, start1, stop1, start2, stop2) => {
+      var value2 = p.norm(value, start1, stop1);
+      if (value2 < 0) {
+        return start2;
+      } else if (value2 < 1) {
+        return p.map(value, start1, stop1, start2, stop2);
+      } else {
+        return stop2;
+      }
+    }
+
+    var conveyorBelt01 = (value) => {
+      if (value < 0.2) {
+        // Move to product to the current station
+        return p.map(value, 0, 0.2, 0, 0.5);
+      } else if (value < 0.8) {
+        // Product is stationary at the station
+        return 0.5;
+      } else {
+        // Move the product away to the next station
+        return p.map(value, 0.8, 1, 0.5, 1);
+      }
+    }
+
+    var conveyorBeltMap = (value, start1, stop1, start2, stop2) => {
+      var value2 = conveyorBelt01(p.norm(value, start1, stop1));
+      return p.map(value2, 0, 1, start2, stop2);
+    }
+
+    var getProductX = (station, valueInCycle) => {
+      var stationWidth = p.width / stations;
+      var stationStart = p.map(station, 0, transits, -stationWidth, p.width + stationWidth);
+      var x = conveyorBeltMap(valueInCycle, 0, cycleLength, stationStart, stationStart + stationWidth); 
+      return x;
+    }
+
+    var getProductY = () => {
+      return p.height / 2;
+    }
+
+    var drawConveyorBelt = xOffset => {
+      p.fill(32);
+      p.stroke(64);
+      p.strokeWeight(10);
+      var slats = 10;
+      var inset = p.height / 2;
+      var stationWidth = p.width / stations;
+      var slatsEnd = stationWidth * transits;
+      
+      for (var slat = 0; slat < slats; ++slat)
+      {
+        var xStart = p.map(slat, 0, slats, 0, slatsEnd) + xOffset;
+        var xEnd = p.map(slat + 1, 0, slats, 0, slatsEnd) + xOffset;
+        
+        p.beginShape();
+        p.vertex(xStart, p.height);
+        p.vertex(xEnd, p.height);
+        p.vertex(xEnd - inset, p.height - inset);
+        p.vertex(xStart - inset, p.height - inset);
+        p.endShape(p.CLOSE);
+      }
+    }
+
+    var drawEye = (alpha) => {
+      var eyeWidth = 40;
+      var eyeHeight = 20;
+      var irisSize = 18;
+      var pupilSize = 6;
+
+      p.stroke(0, 0, 0, alpha);
+      p.fill(255, 255, 255, alpha);
+      p.ellipse(0, 0, eyeWidth, eyeHeight);
+      p.fill(0, 255, 255, alpha);
+      p.ellipse(0, 0, irisSize, irisSize);
+      p.fill(0, 0, 0, alpha);
+      p.ellipse(1, 1, pupilSize, pupilSize);
+    }
+
+    var drawMouth = (alpha) => {
+      var adjustment = 0.2;
+      
+      p.noFill();
+      p.stroke(255, 0, 0, alpha);
+      p.strokeWeight(10);
+      p.arc(0, 15, 70, 70, p.PI + adjustment, p.TWO_PI - adjustment);
+    }
+
+    var drawGlasses = (w) => {
+      var w2 = w * 2;
+      var w3 = w * 3;
+      p.fill(255, 128);
+      p.stroke(0, 0, 0);
+      p.strokeWeight(5);
+      p.ellipse(-w, 0, w2, w2);
+      p.ellipse( w, 0, w2, w2);
+      p.line(-w2, 0, -w3, -w);
+      p.line( w2, 0,  w3, -w);
+    };
+
+    var drawProduct = (position /* the whole number represents the station the product is at, the decimal represents how far through the station it is */) => {
+
+      // Draw a circle for the head
+      p.stroke(0);
+      p.strokeWeight(1);
+      p.fill(0xff, 0xce, 0xb4);
+      p.ellipse(0, 0, 200, 200);  
+
+      var eyeX = 35;
+      var eyeY = -30;
+      
+      // At station 1 on the assembly line (between 1.2 and 1.8) the eyes and mouth appear
+      var faceAlpha = boundedMap(position, 1.2, 1.8, 0, 1);
+      faceAlpha *= p.pow(faceAlpha, 1.5); // bend the way we fade in, because linear doesn't quite look right
+      faceAlpha *= 255;
+      
+      // At station 2 the mouth is turned around
+      var mouthRotation = boundedMap(position, 2.2, 2.8, 0, p.PI);
+
+      // At station 3 the glasses go on
+      var glassesY = boundedMap(position, 3.2, 3.8, -p.height * 0.7, eyeY);
+
+      // Draw eyes
+      p.push();
+      p.translate(-eyeX, eyeY);
+      drawEye(faceAlpha);
+      p.pop();
+      p.push();
+      p.translate(eyeX, eyeY);
+      drawEye(faceAlpha);
+      p.pop();
+
+      // Draw mouth
+      p.push();
+      p.translate(0, 40);
+      p.rotate(mouthRotation);
+      drawMouth(faceAlpha);
+      p.pop();
+
+      // Draw glasses
+      p.push();
+      p.translate(0, glassesY);
+      drawGlasses(35);
+      p.pop();
+    }
+
     p.setup = function() {
       p.createCanvas(900, 300);
     };
@@ -72,18 +204,17 @@ var assemblyLineSketch = p => {
       p.smooth();
       p.background(200);
       var valueInCycle = p.frameCount % cycleLength;
-/*      
+
       drawConveyorBelt(getProductX(0, valueInCycle));
-      
+
       // Draw a product at each station
       for (var station = 0; station < transits; ++station) {
-        var position = station + norm(valueInCycle, 0, cycleLength);
-        pushMatrix();
-        translate(getProductX(station, valueInCycle), getProductY());
+        var position = station + p.norm(valueInCycle, 0, cycleLength);
+        p.push();
+        p.translate(getProductX(station, valueInCycle), getProductY());
         drawProduct(position);
-        popMatrix();
+        p.pop();
       }
-*/
     };
 };
 p5WithCleanup(assemblyLineSketch, 'assemblyLineSketch');

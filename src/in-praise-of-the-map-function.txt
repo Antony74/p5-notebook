@@ -1,21 +1,33 @@
 # %% [markdown]
-# in-praise-of-the-map-function
-Try editing this cell by clicking the pencil on the left!
+# In praise of the map function
+This is my love letter to the p5 map function, which as [the help says](https://p5js.org/reference/#/p5/norm),
+re-maps a number from one range to another.  I think this is jolly useful, underated, and frees the creative
+coder from having think about the math, just "I want that range there", thus allowing us to focus on the
+creative part.
+
+It's actually a fairly simple function, the heart of which can be implemented as follows:
 # %% [javascript]
+const map = function (n, start1, stop1, start2, stop2) {
+    var newval = (n - start1) / (stop1 - start1) * (stop2 - start2) + start2;
+    return newval;
+};
+# %% [markdown]
+There are also two closely related functions, [lerp](https://p5js.org/reference/#/p5/lerp) and
+[norm](https://p5js.org/reference/#/p5/norm), which I personally never both with because
+map is completely general and I prefer to explicitly specify ranges even when it is a zero to one range.
+
+So let's get some house-keeping out of the way, then have a look at some sketches which make extensive
+use of the map function. 
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
 // Import the p5 library, see the docs here: https://p5js.org/
-await import("https://cdn.jsdelivr.net/npm/p5@1.1.9/lib/p5.min.js");
-
-const p5WithCleanup = (sketch, id) => {
-    const elm = document.getElementById(id);
-	if (!elm) {
-      throw new Error(`P5WithCleanup: element with id ${id} not found`);
-    }
-    
-    if (!window.sketches) {
-      window.sketches = {};
-    }
-}
-
+await import("https://cdn.jsdelivr.net/npm/p5@1.7.0/lib/p5.min.js");
+# %% [markdown]
+## Example sketch: Production Line
+Perhaps the best known and most obvious use of the map function is when you want to animate an object
+to move in a straight line from one point to another.  I do a lot of this in my production line animation.
 # %% [javascript]
 // Sketch One
 var s = function( p ) { // p could be any variable name
@@ -31,4 +43,4 @@ var s = function( p ) { // p could be any variable name
     p.rect(x,y,50,50);
   };
 };
-var myp5 = p5WithCleanup(s, 'c1');
+var myp5 = new p5(s, 'c1');

@@ -25,9 +25,9 @@ use of the map function.
 // Import the p5 library, see the docs here: https://p5js.org/
 await import("https://cdn.jsdelivr.net/npm/p5@1.7.0/lib/p5.min.js");
 # %% [markdown]
-## Example sketch: Production Line
+## Example sketch: Assembly Line
 Perhaps the best known and most obvious use of the map function is when you want to animate an object
-to move in a straight line from one point to another.  I do a lot of this in my production line animation.
+to move in a straight line from one point to another.  I do a lot of this in my assembly line animation.
 # %%--- [javascript]
 # properties:
 #   run_on_load: true
@@ -46,17 +46,44 @@ var p5WithCleanup = (sketch, id) => {
     return p5Instance;
 };
 
-var s = function( p ) {
-  var x = 100; 
-  var y = 100;
-  p.setup = function() {
-    p.createCanvas(400, 200);
-  };
+var assemblyLineSketch = p => {
+    var cycleLength = 200; // The number of frames the product is at each station
+    var stations = 3; // The number of stations in this production line
+    var transits = stations + 2; // We want to see products moving between each station, plus on and off the screen
 
-  p.draw = function() {
-    p.background(0);
-    p.fill(255);
-    p.rect(x,y,50,50);
+/*
+  var drawGlasses = w => {
+    float w2 = w * 2;
+    float w3 = w * 3;
+    p.fill(255, 128);
+    p.stroke(0, 0, 0);
+    p.strokeWeight(5);
+    p.ellipse(-w, 0, w2, w2);
+    p.ellipse( w, 0, w2, w2);
+    p.line(-w2, 0, -w3, -w);
+    p.line( w2, 0,  w3, -w);
   };
+*/
+    p.setup = function() {
+      p.createCanvas(900, 300);
+    };
+
+    p.draw = function() {
+      p.smooth();
+      p.background(200);
+      var valueInCycle = p.frameCount % cycleLength;
+/*      
+      drawConveyorBelt(getProductX(0, valueInCycle));
+      
+      // Draw a product at each station
+      for (var station = 0; station < transits; ++station) {
+        var position = station + norm(valueInCycle, 0, cycleLength);
+        pushMatrix();
+        translate(getProductX(station, valueInCycle), getProductY());
+        drawProduct(position);
+        popMatrix();
+      }
+*/
+    };
 };
-p5WithCleanup(s, 'c1');
+p5WithCleanup(assemblyLineSketch, 'assemblyLineSketch');

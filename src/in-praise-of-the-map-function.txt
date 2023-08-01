@@ -30,6 +30,7 @@ Perhaps the best known and most obvious use of the map function is when you want
 to move in a straight line from one point to another.  I do a lot of this in my assembly line animation.
 # %%--- [javascript]
 # properties:
+#   top_hidden: true
 #   run_on_load: true
 # ---%%
 var p5WithCleanup = (sketch, id) => {
@@ -217,4 +218,26 @@ var assemblyLineSketch = p => {
       }
     };
 };
+
 p5WithCleanup(assemblyLineSketch, 'assemblyLineSketch');
+# %% [markdown]
+This is a parody of a desktop software development flow.  The three stations in this assembly line
+are development, quality assurance, and documentation.  I've shared this sketch first not because
+I feel it's particularly good or creative, but it's kind of peak map function.  Everything that
+moves moves in a straight line, or rotates at a constant rate, or fades in at a constant rate.
+It's almost painful how it screams map function at you if you stare at it too long.
+
+# Example sketch: moving a circle
+
+OK, so animating things in a straight line - let's look at a much simpler example:
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var animatedCircle = p => {
+  p.draw = () => {
+    p.ellipse(10, 10, 10, 10);
+  }
+}
+
+p5WithCleanup(animatedCircle, 'animatedCircle');

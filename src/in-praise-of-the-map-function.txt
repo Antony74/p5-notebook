@@ -33,17 +33,25 @@ to move in a straight line from one point to another.  I do a lot of this in my 
 #   top_hidden: true
 #   run_on_load: true
 # ---%%
-var p5WithCleanup = (sketch, id) => {
+var p5WithCleanup = (sketch, text) => {
     if (!window.sketches) {
         window.sketches = {};
     }
 
-    if (window.sketches[id]) {
-        window.sketches[id].remove();
+    if (window.sketches[text]) {
+        window.sketches[text].remove();
     }
 
-    const p5Instance = new p5(sketch);
-    window.sketches[id] = p5Instance;
+    const matchedElements = Array.from(document.querySelectorAll('.cell-bottom'));
+
+    const matchedElement = matchedElements.find(elm => elm.parentElement.textContent.split(text).length > 1);
+
+    if (!matchedElement) {
+        throw new Error(`p5WithCleanup: text not found '${text}'`);
+    }
+
+    const p5Instance = new p5(sketch, matchedElement);
+    window.sketches[text] = p5Instance;
     return p5Instance;
 };
 
@@ -221,13 +229,13 @@ var assemblyLineSketch = p => {
 
 p5WithCleanup(assemblyLineSketch, 'assemblyLineSketch');
 # %% [markdown]
-This is a parody of a desktop software development flow.  The three stations in this assembly line
+This is a parody of a flow for developing desktop software.  The three stations in this assembly line
 are development, quality assurance, and documentation.  I've shared this sketch first not because
 I feel it's particularly good or creative, but it's kind of peak map function.  Everything that
 moves moves in a straight line, or rotates at a constant rate, or fades in at a constant rate.
 It's almost painful how it screams map function at you if you stare at it too long.
 
-# Example sketch: moving a circle
+# Example sketch: Moving a Circle
 
 OK, so animating things in a straight line - let's look at a much simpler example:
 # %%--- [javascript]

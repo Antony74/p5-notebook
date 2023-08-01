@@ -28,9 +28,25 @@ await import("https://cdn.jsdelivr.net/npm/p5@1.7.0/lib/p5.min.js");
 ## Example sketch: Production Line
 Perhaps the best known and most obvious use of the map function is when you want to animate an object
 to move in a straight line from one point to another.  I do a lot of this in my production line animation.
-# %% [javascript]
-// Sketch One
-var s = function( p ) { // p could be any variable name
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var p5WithCleanup = (sketch, id) => {
+    if (!window.sketches) {
+        window.sketches = {};
+    }
+
+    if (window.sketches[id]) {
+        window.sketches[id].remove();
+    }
+
+    const p5Instance = new p5(sketch);
+    window.sketches[id] = p5Instance;
+    return p5Instance;
+};
+
+var s = function( p ) {
   var x = 100; 
   var y = 100;
   p.setup = function() {
@@ -43,6 +59,4 @@ var s = function( p ) { // p could be any variable name
     p.rect(x,y,50,50);
   };
 };
-new p5WithCleanup(s, 'c1');
-# %% [html]
-<div id="c1"></div>
+p5WithCleanup(s, 'c1');

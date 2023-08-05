@@ -6,8 +6,11 @@ coder from having think about the math.  We just have to think "I want that rang
 focus on being creative.
 
 It's actually a fairly simple function, the heart of which can be implemented as follows:
-# %% [javascript]
-const map = function (n, start1, stop1, start2, stop2) {
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var map = (n, start1, stop1, start2, stop2) => {
     return (n - start1) / (stop1 - start1) * (stop2 - start2) + start2;
 };
 # %% [markdown]
@@ -262,7 +265,7 @@ Now let's look at a much simpler example of animating things in a straight line:
 var animatedCircle = p => {
   var animationLength = 200;
 
-  p.setup = function() {
+  p.setup = () => {
       p.createCanvas(300, 300);
   };
 
@@ -303,19 +306,19 @@ things in a straight line, so let's use map to vary the color and thickness of a
 #   run_on_load: true
 # ---%%
 var otherUses = p => {
-  p.setup = function() {
+  p.setup = () => {
       p.createCanvas(300, 300);
       p.background(200);
       p.noStroke();
-      p.colorMode(p.HSB);
+      p.colorMode(p.HSB, 700);
 
       var steps = 100;
       for (var n = 1; n < steps; ++n) {
 
         p.fill(
-          p.map(n, 1, steps, 0, 255),
-          255,
-          255,
+          p.map(n, 1, steps, 600, 0),
+          700,
+          700,
         );
 
         p.ellipse(
@@ -399,11 +402,11 @@ Let's see it in action:
 #   run_on_load: true
 # ---%%
 var powerMapExample = p => {
-  p.setup = function() {
+  p.setup = () => {
       p.createCanvas(300, 300);
       p.background(0);
       p.noFill();
-      p.colorMode(p.HSB);
+      p.colorMode(p.HSB, 255);
 
       var steps = 100;
       var margin = 25;
@@ -434,3 +437,81 @@ p5WithCleanup(powerMapExample, 'powerMapExample');
 # %% [markdown]
 So if a linear map doesn't give you quite the effect you're looking for, and you'd like to
 bend it a bit, try a powerMap.
+
+## segmentedMap
+
+Maybe I should stopped at this point, but if you go map crazy like me, you might want
+to start another map where the previous one left off.  For example, you may be defining a patrol
+route that a minatour takes through a maze - it moves in a straight line,
+but occasionally changes direction.  For that we can use a segmented map.
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var segmentedMap = (value, range1, range2, maps) => {
+  if (range1.length !== range2.length) {
+    throw new Error('segmentedMap range arrays not equal');
+  }
+
+  const n = range1.findIndex((t) => t > value);
+  switch (n) {
+    case 0:
+      return range2[0];
+    case -1:
+      return range2[range2.length - 1];
+    default:
+      var currentMap = (maps && maps[n - 1]) ? maps[n - 1] : map;
+      return currentMap(
+        value,
+        range1[n - 1],
+        range1[n],
+        range2[n - 1],
+        range2[n]
+      );
+  }
+};
+# %% [markdown]
+OK, let's use segmentedMap to draw a house with an arched roof.
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var segmentedMapExample = p => {
+  var segmentLength = 199;
+  var animationLength = segmentLength * 4;
+  var colorCycle = segmentLength * 4.5 * 0.1;
+
+  p.setup = () => {
+      p.createCanvas(300, 300);
+      p.colorMode(p.HSB, 255);
+      p.background(0);
+  };
+
+  p.draw = () => {
+    p.noStroke();
+    p.fill(
+      p.map(p.frameCount % colorCycle, 0, colorCycle, 0, 255),
+      255, 
+      255,
+    );
+
+    var frame = p.frameCount % animationLength;
+    var timeSegments = [0, 0.5, 1, 2, 3, 4].map(value => value * segmentLength);
+
+    var left = 75;
+    var right = 225;
+    var middle = (left + right) / 2;
+    var roofBottom = 100;
+    var roofTop = 50;
+    var bottom = 250;
+
+    var x = segmentedMap(frame, timeSegments, [left, middle, right, right, left, left]);
+    var y = segmentedMap(frame, timeSegments, [roofBottom, roofTop, roofBottom, bottom, bottom, roofBottom]);
+
+    p.ellipse(x, y, 10);
+  };
+}
+
+p5WithCleanup(segmentedMapExample, 'segmentedMapExample');
+# %% [markdown]
+Thanks for reading.  I hope you have fun with the map function!

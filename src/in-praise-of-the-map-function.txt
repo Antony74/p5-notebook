@@ -1,6 +1,6 @@
 # %% [markdown]
 # In praise of the map function
-This is my love letter to the p5 map function, which as [the help says](https://p5js.org/reference/#/p5/norm),
+This is my love letter to the p5 map function, which as [the help says](https://p5js.org/reference/#/p5/map),
 re-maps a number from one range to another.  I think this is jolly useful, underated, and frees the creative
 coder from having think about the math.  We just have to think "I want that range there", and this frees us to
 focus on being creative.
@@ -8,13 +8,30 @@ focus on being creative.
 It's actually a fairly simple function, the heart of which can be implemented as follows:
 # %% [javascript]
 const map = function (n, start1, stop1, start2, stop2) {
-    var newval = (n - start1) / (stop1 - start1) * (stop2 - start2) + start2;
-    return newval;
+    return (n - start1) / (stop1 - start1) * (stop2 - start2) + start2;
 };
 # %% [markdown]
-There are also two closely related functions, [lerp](https://p5js.org/reference/#/p5/lerp) and
-[norm](https://p5js.org/reference/#/p5/norm), which I personally never both with because
-map is completely general and I prefer to explicitly specify ranges even when it is a zero to one range.
+Indeed it was implemented like that until an extra optional parameter `withinBounds` was added.
+I approve of this enhancement but it does make the implementation look a bit more complex than
+it actually is.
+# %% [javascript]
+_main.default.prototype.map = function (n, start1, stop1, start2, stop2, withinBounds) {
+    _main.default._validateParameters('map', arguments);
+    var newval = (n - start1) / (stop1 - start1) * (stop2 - start2) + start2;
+    if (!withinBounds) {
+        return newval;
+    }
+    if (start2 < stop2) {
+        return this.constrain(newval, start2, stop2);
+    } else {
+        return this.constrain(newval, stop2, start2);
+    }
+};
+# %% [markdown]
+In addition to [map](https://p5js.org/reference/#/p5/map), there are also two closely related functions,
+[lerp](https://p5js.org/reference/#/p5/lerp) and [norm](https://p5js.org/reference/#/p5/norm),
+which I personally never bother with because map is completely general and I prefer to explicitly
+specify ranges even when it is a zero to one range.
 
 So let's get some house-keeping out of the way, then have a look at some sketches which make extensive
 use of the map function. 
@@ -237,15 +254,183 @@ It's almost painful how it screams map function at you if you stare at it too lo
 
 # Example sketch: Moving a Circle
 
-OK, so animating things in a straight line - let's look at a much simpler example:
+Now let's look at a much simpler example of animating things in a straight line:
 # %%--- [javascript]
 # properties:
 #   run_on_load: true
 # ---%%
 var animatedCircle = p => {
+  var animationLength = 200;
+
+  p.setup = function() {
+      p.createCanvas(300, 300);
+  };
+
   p.draw = () => {
-    p.ellipse(10, 10, 10, 10);
+      p.background(200);
+
+      var xStart = 50;
+      var yStart = 250;
+      var xStop = 250;
+      var yStop = 50;
+      var frame = p.frameCount % animationLength;
+      var x = p.map(frame, 1, animationLength, xStart, xStop);
+      var y = p.map(frame, 1, animationLength, yStart, yStop);
+      p.ellipse(x, y, 20);
   }
 }
 
 p5WithCleanup(animatedCircle, 'animatedCircle');
+# %% [markdown]
+By the way, we're in an interactive notebook.  If you haven't discovered that already, now would
+be a good time to make one small change to the code above, press the play button (bottom left of
+code editor), and see what happens.  For example you could change the start or end point of
+the animation, make the animation longer or shorter, change the ellipse to a rect, make something
+a different color, or add a second shape.
+
+I won't ask you again, and there will not be a test at the end.  But I did choose this notebook
+especially in the hope it would minimise the barriers to creative coding.
+
+Also bear in mind there's no save option.  So if you write anything you wish to keep, please
+copy it elsewhere before you leave this page.
+
+## Example sketch: Other uses
+
+The map function is highly versatile.  I don't want to give the impression it is just for animating
+things in a straight line, so let's use map to vary the color and thickness of a static shape.
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var otherUses = p => {
+  p.setup = function() {
+      p.createCanvas(300, 300);
+      p.background(200);
+      p.noStroke();
+      p.colorMode(p.HSB);
+
+      var steps = 100;
+      for (var n = 1; n < steps; ++n) {
+
+        p.fill(
+          p.map(n, 1, steps, 0, 255),
+          255,
+          255,
+        );
+
+        p.ellipse(
+          p.map(n, 1, steps, 50, 200),
+          p.map(n, 1, steps, 50, 200),
+          p.map(n, 1, steps, 50, 150),
+        );
+
+      }
+  };
+}
+
+p5WithCleanup(otherUses, 'otherUses');
+# %% [markdown]
+## linearMap
+
+I confess I prefer to call the map function 'linearMap'.  There are two reasons for this:
+
+Firstly, JavaScript already has an excellent function which is also called 'map'.  Maybe one day
+I'll write a love letter to the map/filter/reduce paradigm.
+
+Secondly, linearMap is completely unambiguous.  There are unlimited possible routes from point A
+to point B, but only one route that takes even steps in a straight line.
+
+So let's look at some map functions that are not linear.
+
+## powerMap
+
+The map function breaks neatly into two parts, first the starting range in mapped on to the 
+range 0 to 1, then 0 to 1 is mapped onto the desired finishing range.  If we want to deform the map,
+then we'd best make that change in the middle, where we know the range is 0 to 1, so we
+can deform the map consistently regardless of whether the start and finishing range are.
+This means that functions that when passed zero return zero, and that when passed one return
+one, are particularly valuable, because we're not changing our start and end points, we're
+only changing how the path we use to get between them.
+
+Math.pow has these desired properties...
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+console.log(`Math.pow(0, 2) is ${Math.pow(0, 2)}`);
+console.log(`Math.pow(0, 3) is ${Math.pow(0, 3)}`);
+console.log(`Math.pow(0, 44) is ${Math.pow(0, 44)}`);
+console.log(`Math.pow(1, 2) is ${Math.pow(1, 2)}`);
+console.log(`Math.pow(1, 3) is ${Math.pow(1, 3)}`);
+console.log(`Math.pow(1, 44) is ${Math.pow(1, 44)}`);
+# %% [markdown]
+...and as an added bonus, the power of one produces a linear
+map.  So if we want to introduce a slight curve we set the power close to one, and if we want
+a bigger curve we set it further away from one.  (Powers below zero are beyond the scope of this
+notebook!)
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var powerMap = (power) => {
+  return (value, range1start, range1end, range2start, range2end) => {
+    const linearRatio = (value - range1start) / (range1end - range1start);
+    const ratio = Math.pow(linearRatio, power);
+    return range2start + ((range2end - range2start) * ratio);
+  };
+};
+# %% [markdown]
+powerMap has been defined as a function which returns a function (which returns a number).
+This is known as a second-order function.  Other sorts of higher-order functions also exist.
+A function that returned a function which returned a function which returned a number would
+be a third-order function.  But second-order is quite enough, thank you!
+
+We could have defined powerMap as a perfectly ordinary first-order function, just by adding
+an extra parameter (power) to the existing map function.  But I didn't do that because, notice
+the function returned by powerMap takes exactly the same parameters as map function.  So
+it's a drop-in replacement for (and indeed a generalisation of), the original linear map function.
+
+Let's see it in action:
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var powerMapExample = p => {
+  p.setup = function() {
+      p.createCanvas(300, 300);
+      p.background(0);
+      p.noFill();
+      p.colorMode(p.HSB);
+
+      var steps = 100;
+      var margin = 25;
+
+      var powers = [1/8, 1/3, 1/2, 1, 2, 3, 8];
+
+      powers.forEach((power, index) => {
+        var currentPowerMap = powerMap(power);
+        p.stroke(
+          p.map(index, 1, powers.length, 0, 255),
+          255,
+          255);
+
+        p.beginShape();
+
+        for (var step = 1; step <= steps; ++step) {
+          var x = p.map(step, 1, steps, margin, p.width - margin);
+          var y = currentPowerMap(step, 1, steps, margin, p.height - margin);
+          p.vertex(x, y);
+        }
+
+        p.endShape();
+      });
+  }
+}
+
+p5WithCleanup(powerMapExample, 'powerMapExample');
+# %% [markdown]
+So if a linear map doesn't give you quite the effect you're looking for, and you'd like to
+bend it a bit, try a powerMap.

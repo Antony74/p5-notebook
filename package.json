@@ -10,7 +10,7 @@
     },
     "keywords": [],
     "author": "Antony74",
-    "license": "MIT",
+    "license": "CC0-1.0",
     "homepage": "https://github.com/Antony74/p5-notebook#readme",
     "dependencies": {
         "http-server": "^14.1.1"

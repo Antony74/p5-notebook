@@ -1,8 +1,8 @@
 # %% [markdown]
 # In praise of the map function
 This is my love letter to the p5 map function, which as [the help says](https://p5js.org/reference/#/p5/map),
-re-maps a number from one range to another.  I think this is jolly useful, underated, and frees the creative
-coder from having think about the math.  We just have to think "I want that range there", and this frees us to
+re-maps a number from one range to another.  I think this is jolly useful, underrated, and frees the creative
+coder from having to think about the math.  We just have to think "I want that range there", and this frees us to
 focus on being creative.
 
 It's actually a fairly simple function, the heart of which can be implemented as follows:
@@ -36,7 +36,7 @@ In addition to [map](https://p5js.org/reference/#/p5/map), there are also two cl
 which I personally never bother with because map is completely general and I prefer to explicitly
 specify ranges even when it is a zero to one range.
 
-So let's get some house-keeping out of the way, then have a look at some sketches which make extensive
+So let's get some house-keeping out of the way, then have a look at a sketch which makes extensive
 use of the map function. 
 # %%--- [javascript]
 # properties:
@@ -249,7 +249,7 @@ var assemblyLineSketch = p => {
 
 p5WithCleanup(assemblyLineSketch, 'assemblyLineSketch');
 # %% [markdown]
-This is a parody of a flow for developing desktop software.  The three stations in this assembly line
+This is a parody of a flow for developing desktop software.  The three stations on this assembly line
 are development, quality assurance, and documentation.  I've shared this sketch first not because
 I feel it's particularly good or creative, but it's kind of peak map function.  Everything that
 moves moves in a straight line, or rotates at a constant rate, or fades in at a constant rate.
@@ -292,7 +292,7 @@ the animation, make the animation longer or shorter, change the ellipse to a rec
 a different color, or add a second shape.
 
 I won't ask you again, and there will not be a test at the end.  But I did choose this notebook
-especially in the hope it would minimise the barriers to creative coding.
+format especially in the hope it would minimize the barriers to creative coding.
 
 Also bear in mind there's no save option.  So if you write anything you wish to keep, please
 copy it elsewhere before you leave this page.
@@ -300,7 +300,7 @@ copy it elsewhere before you leave this page.
 ## Example sketch: Other uses
 
 The map function is highly versatile.  I don't want to give the impression it is just for animating
-things in a straight line, so let's use map to vary the color and thickness of a static shape.
+things in a straight line, so let's use the map function to vary the color and thickness along a static shape.
 # %%--- [javascript]
 # properties:
 #   run_on_load: true
@@ -333,7 +333,7 @@ var otherUses = p => {
 
 p5WithCleanup(otherUses, 'otherUses');
 # %% [markdown]
-## linearMap
+## Linear and non-linear maps
 
 I confess I prefer to call the map function 'linearMap'.  There are two reasons for this:
 
@@ -343,17 +343,18 @@ I'll write a love letter to the map/filter/reduce paradigm.
 Secondly, linearMap is completely unambiguous.  There are unlimited possible routes from point A
 to point B, but only one route that takes even steps in a straight line.
 
-So let's look at some map functions that are not linear.
+In animation, map functions which are not linear are called [easing functions](https://easings.net/) - see
+that website for more examples.  Here I'm just going to talk about one easing function, the powerMap.
 
 ## powerMap
 
 The map function breaks neatly into two parts, first the starting range in mapped on to the 
 range 0 to 1, then 0 to 1 is mapped onto the desired finishing range.  If we want to deform the map,
 then we'd best make that change in the middle, where we know the range is 0 to 1, so we
-can deform the map consistently regardless of whether the start and finishing range are.
-This means that functions that when passed zero return zero, and that when passed one return
-one, are particularly valuable, because we're not changing our start and end points, we're
-only changing how the path we use to get between them.
+can deform the map consistently regardless of whatever the start and finishing ranges are.
+This means that functions that return zero when passed zero, and that return one when passed one,
+are particularly valuable, because we do not wish to change our start and end points, we
+only wish to change how we get between them.
 
 Math.pow has these desired properties...
 
@@ -391,9 +392,10 @@ A function that returned a function which returned a function which returned a n
 be a third-order function.  But second-order is quite enough, thank you!
 
 We could have defined powerMap as a perfectly ordinary first-order function, just by adding
-an extra parameter (power) to the existing map function.  But I didn't do that because, notice
-the function returned by powerMap takes exactly the same parameters as map function.  So
-it's a drop-in replacement for (and indeed a generalisation of), the original linear map function.
+the extra parameter (power) to the existing map function parameters.  But I didn't want to
+do this because - notice the function returned by powerMap takes exactly the same parameters
+as the map function.  So it's a drop-in replacement for (and indeed a generalization of), the
+original linear map function.
 
 Let's see it in action:
 
@@ -436,13 +438,13 @@ var powerMapExample = p => {
 p5WithCleanup(powerMapExample, 'powerMapExample');
 # %% [markdown]
 So if a linear map doesn't give you quite the effect you're looking for, and you'd like to
-bend it a bit, try a powerMap.
+bend it a bit, you could try a powerMap.
 
 ## segmentedMap
 
-Maybe I should stopped at this point, but if you go map crazy like me, you might want
+Maybe I should stopped right there, but if you go map crazy like me, you might want
 to start another map where the previous one left off.  For example, you may be defining a patrol
-route that a minatour takes through a maze - it moves in a straight line,
+route that a minotaur takes through a maze - it moves in a straight line,
 but occasionally changes direction.  For that we can use a segmented map.
 # %%--- [javascript]
 # properties:

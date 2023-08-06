@@ -2,6 +2,7 @@
     "name": "p5-notebook",
     "version": "1.0.0",
     "scripts": {
+        "install": "curl https://raw.githubusercontent.com/Antony74/starboard-wrap/master/examples/coi-serviceworker.js --output src/coi-serviceworker.js",
         "start": "http-server src"
     },
     "repository": {

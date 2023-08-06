@@ -524,13 +524,8 @@ var segmentedMapExample2 = p => {
   var animationLength = segmentLength * 4;
   var colorCycle = segmentLength * 4.5 * 0.1;
 
-  var roofMap = fn => (n, start1, stop1, start2, stop2) => {
-    const theta = p.map(n, start1, stop1, 0, p.HALF_PI);
-    const ratio = fn(theta);
-    return p.map(ratio, 0, 1, Math.max(start2, stop2), Math.min(start2, stop2));
-  }
-
-  var backwardSin = theta => Math.sin(p.HALF_PI - theta);
+  var roofMap = powerMap(2);
+  var backwardsMap = fn => (n, start1, stop1, start2, stop2) => fn(n, stop1, start1, stop2, start2);
 
   p.setup = () => {
       p.createCanvas(300, 300);
@@ -566,7 +561,7 @@ var segmentedMapExample2 = p => {
       frame,
       timeSegments,
       [roofBottom, roofTop, roofBottom, bottom, bottom, roofBottom],
-      [roofMap(Math.sin), roofMap(backwardSin)]
+      [backwardsMap(roofMap), roofMap]
     );
 
     p.ellipse(x, y, 10);

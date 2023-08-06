@@ -471,13 +471,13 @@ var segmentedMap = (value, range1, range2, maps) => {
   }
 };
 # %% [markdown]
-OK, let's use segmentedMap to draw a house with an arched roof.
+OK, let's use segmentedMap to draw a house.
 # %%--- [javascript]
 # properties:
 #   run_on_load: true
 # ---%%
 var segmentedMapExample = p => {
-  var segmentLength = 199;
+  var segmentLength = 200;
   var animationLength = segmentLength * 4;
   var colorCycle = segmentLength * 4.5 * 0.1;
 
@@ -513,5 +513,66 @@ var segmentedMapExample = p => {
 }
 
 p5WithCleanup(segmentedMapExample, 'segmentedMapExample');
+# %% [markdown]
+Now let's give it a curved roof.
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var segmentedMapExample2 = p => {
+  var segmentLength = 200;
+  var animationLength = segmentLength * 4;
+  var colorCycle = segmentLength * 4.5 * 0.1;
+
+  var roofMap = fn => (n, start1, stop1, start2, stop2) => {
+    const theta = p.map(n, start1, stop1, 0, p.HALF_PI);
+    const ratio = fn(theta);
+    return p.map(ratio, 0, 1, Math.max(start2, stop2), Math.min(start2, stop2));
+  }
+
+  var backwardSin = theta => Math.sin(p.HALF_PI - theta);
+
+  p.setup = () => {
+      p.createCanvas(300, 300);
+      p.colorMode(p.HSB, 255);
+      p.background(0);
+  };
+
+  p.draw = () => {
+    p.noStroke();
+    p.fill(
+      p.map(p.frameCount % colorCycle, 0, colorCycle, 0, 255),
+      255, 
+      255,
+    );
+
+    var frame = p.frameCount % animationLength;
+    var timeSegments = [0, 0.5, 1, 2, 3, 4].map(value => value * segmentLength);
+
+    var left = 75;
+    var right = 225;
+    var middle = (left + right) / 2;
+    var roofBottom = 100;
+    var roofTop = 50;
+    var bottom = 250;
+
+    var x = segmentedMap(
+      frame,
+      timeSegments,
+      [left, middle, right, right, left, left]
+    );
+
+    var y = segmentedMap(
+      frame,
+      timeSegments,
+      [roofBottom, roofTop, roofBottom, bottom, bottom, roofBottom],
+      [roofMap(Math.sin), roofMap(backwardSin)]
+    );
+
+    p.ellipse(x, y, 10);
+  };
+}
+
+p5WithCleanup(segmentedMapExample2, 'segmentedMapExample2');
 # %% [markdown]
 Thanks for reading.  I hope you have fun with the map function!

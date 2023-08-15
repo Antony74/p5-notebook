@@ -1,0 +1,49 @@
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+
+var winningCells = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6],
+];
+
+// getGameState
+//     board - a nine character string of 'X', 'O', and ' '
+// returns:
+//     ' ' - game is still being played
+//     'X' - X wins
+//     'O' - O wins
+//     '=' - Draw
+var getGameState = board => {
+    if (board.length !== 9) {
+        throw new Error('Not a tic-tac-toe board');
+    }
+
+    for([a, b, c] of winningCells) {
+        if (board[a] !== ' ' && board[a] === board[b] && board[a] === board[c]) {
+            return board[a];
+        }
+    }
+
+    // Draw or ongoing?
+
+    return board.split('').filter(pos => pos !== ' ').length === 9 ? '=' : ' ';
+}
+
+console.log(getGameState('XXX      '));
+console.log(getGameState('   XXX   '));
+console.log(getGameState('      XXX'));
+console.log(getGameState('X  X  X  '));
+console.log(getGameState(' X  X  X '));
+console.log(getGameState('  X  X  X'));
+console.log(getGameState('         '));
+console.log(getGameState('O   O   O'));
+console.log(getGameState('  O O O  '));
+console.log(getGameState('XOXOOXOXO'));

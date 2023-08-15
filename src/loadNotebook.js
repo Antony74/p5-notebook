@@ -1,7 +1,7 @@
 import { StarboardEmbed } from 'https://cdn.jsdelivr.net/npm/starboard-wrap@0.4.1/dist/index.min.js';
 
 export const loadNotebook = (url, id) => {
-    fetch(url)
+    fetch(url, { cache: 'no-cache' })
         .then((response) => response.text())
         .then((notebookContent) => {
             const el = new StarboardEmbed({

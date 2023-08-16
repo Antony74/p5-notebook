@@ -37,7 +37,7 @@ var getGameState = board => {
     return board.split('').filter(pos => pos !== ' ').length === 9 ? '=' : ' ';
 }
 
-var nextStates = board => {
+var nextGameStates = board => {
     if (getGameState(board) !== ' ') {
         return []; // Game over
     }
@@ -49,11 +49,43 @@ var nextStates = board => {
     return boardArray.reduce((acc, value, index) => {
         if (value === ' ') {
             const newBoard = board.substring(0, index) + whoseMove + board.substring(index + 1);;
-            console.log({newBoard});
             return [...acc, newBoard];
         } else {
             return acc;
         }
-    }, []).join('');
+    }, []);
 }
+
+var reduceGameStates = (reducer, initialAccumulator, initialState) => {
+    var index = 0;
+
+    var reduceGameStatesRecursive = (initialAccumulator, initialState) => {
+        var acc = reducer(initialAccumulator, initialState, index);
+        ++index;
+
+        return nextGameStates(initialState).reduce((acc, value) => {
+            return reduceGameStatesRecursive(acc, value);
+        }, acc);     
+    }
+
+    return reduceGameStatesRecursive(initialAccumulator, initialState || '         ');
+}
+
+var timeTaken = (fn) => {
+    const start = performance.now();
+    fn();
+    const end = performance.now();
+    console.log(`Time taken ${((end - start) / 1000).toFixed(2)} seconds`);
+}
+
+# %% [markdown]
+Now let's put it to the test.
+# %% [javascript]
+timeTaken(() => {
+    var lastIndex = reduceGameStates((acc, value, index) => {
+        return index;
+    }, undefined);
+
+    console.log(`Total game states ${lastIndex + 1}`);
+});
 

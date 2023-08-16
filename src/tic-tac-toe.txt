@@ -37,13 +37,23 @@ var getGameState = board => {
     return board.split('').filter(pos => pos !== ' ').length === 9 ? '=' : ' ';
 }
 
-console.log(getGameState('XXX      '));
-console.log(getGameState('   XXX   '));
-console.log(getGameState('      XXX'));
-console.log(getGameState('X  X  X  '));
-console.log(getGameState(' X  X  X '));
-console.log(getGameState('  X  X  X'));
-console.log(getGameState('         '));
-console.log(getGameState('O   O   O'));
-console.log(getGameState('  O O O  '));
-console.log(getGameState('XOXOOXOXO'));
+var nextStates = board => {
+    if (getGameState(board) !== ' ') {
+        return []; // Game over
+    }
+
+    boardArray = board.split('');
+
+    var whoseMove = boardArray.filter(o => o === 'O').length < boardArray.filter( x => x === 'X').length ? 'O' : 'X';
+
+    return boardArray.reduce((acc, value, index) => {
+        if (value === ' ') {
+            const newBoard = board.substring(0, index) + whoseMove + board.substring(index + 1);;
+            console.log({newBoard});
+            return [...acc, newBoard];
+        } else {
+            return acc;
+        }
+    }, []).join('');
+}
+

@@ -56,20 +56,17 @@ var nextGameStates = board => {
     }, []);
 }
 
-var reduceGameStates = (reducer, initialAccumulator, initialState) => {
-    var index = 0;
+var getAllGameStates = (initialState) => {
 
-    var reduceGameStatesRecursive = (initialAccumulator, initialState) => {
-        var acc = reducer(initialAccumulator, initialState, index);
-        ++index;
+    allGameStates.push(initialState);
 
-        return nextGameStates(initialState).reduce((acc, value) => {
-            return reduceGameStatesRecursive(acc, value);
-        }, acc);     
-    }
-
-    return reduceGameStatesRecursive(initialAccumulator, initialState ? initialState : '         ');
+    return nextGameStates(initialState).forEach((value) => {
+        getAllGameStates(value);
+    });
 }
+
+var allGameStates = [];
+getAllGameStates('         ');
 
 var timeTaken = (fn) => {
     const start = performance.now();
@@ -78,38 +75,16 @@ var timeTaken = (fn) => {
     console.log(`Time taken ${((end - start) / 1000).toFixed(2)} seconds`);
 }
 
-const mapReducer = (fn) => {
-    return (acc, value, index) => {
-        acc.push(fn(value, index));
-        return acc;
-    };
-}
-
-const filterReducer = (fn) => {
-    return (acc, value, index) => {
-        if (fn(value, index)) {
-            acc.push(value);
-        }
-        return acc;
-    };
-}
-
-var mapGameStates = (fn, initialState) => reduceGameStates(mapReducer(fn), [], initialState);
-var filterGameStates = (fn, initialState) => reduceGameStates(filterReducer(fn), [], initialState);
-
 # %% [markdown]
 Now let's put it to the test.
 # %% [javascript]
 timeTaken(() => {
-    var totalGameStates = filterGameStates(value => {
-        return true;
-    }).length;
-
+    var totalGameStates = allGameStates.length;
     console.log(`Total games states ${totalGameStates}`);
 });
 # %% [javascript]
 timeTaken(() => {
-    var xWins = filterGameStates(value => {
+    var xWins = allGameStates.filter(value => {
         return getGameState(value) === 'X';
     }).length;
 
@@ -117,7 +92,7 @@ timeTaken(() => {
 });
 # %% [javascript]
 timeTaken(() => {
-    var oWins = filterGameStates(value => {
+    var oWins = allGameStates.filter(value => {
         return getGameState(value) === 'O';
     }).length;
 
@@ -125,7 +100,7 @@ timeTaken(() => {
 });
 # %% [javascript]
 timeTaken(() => {
-    var wins = filterGameStates(value => {
+    var wins = allGameStates.filter(value => {
         var state = getGameState(value);
         return state === 'X' || state === 'O';
     }).length;
@@ -134,18 +109,16 @@ timeTaken(() => {
 });
 # %% [javascript]
 timeTaken(() => {
-    var draws = filterGameStates(value => {
-        var state = getGameState(value);
-        return state === '=';
+    var draws = allGameStates.filter(value => {
+        return getGameState(value) === '=';
     }).length;
 
     console.log(`Total games which draw ${draws}`);
 });
 # %% [javascript]
 timeTaken(() => {
-    var games = filterGameStates(value => {
-        var state = getGameState(value);
-        return state !== ' ';
+    var games = allGameStates.filter(value => {
+        return getGameState(value) !== ' ';
     }).length;
 
     console.log(`Total games ${games}`);
@@ -159,11 +132,7 @@ Now let's consider unique states.
 var unique = (arr) => [...new Set(arr)];
 # %% [javascript]
 timeTaken(() => {
-    var uniqueGameStates = unique(
-        filterGameStates(value => {
-            return true;
-        })
-    ).length;
+    var uniqueGameStates = unique(allGameStates).length;
 
     console.log(`Total games states ${uniqueGameStates}`);
 });

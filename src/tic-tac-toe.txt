@@ -23,7 +23,7 @@ var winningCells = [
 //     '=' - Draw
 var getGameState = board => {
     if (board.length !== 9) {
-        throw new Error('Not a tic-tac-toe board');
+        throw new Error(`${board} is not a tic-tac-toe board`);
     }
 
     for([a, b, c] of winningCells) {
@@ -68,7 +68,7 @@ var reduceGameStates = (reducer, initialAccumulator, initialState) => {
         }, acc);     
     }
 
-    return reduceGameStatesRecursive(initialAccumulator, initialState || '         ');
+    return reduceGameStatesRecursive(initialAccumulator, initialState ? initialState : '         ');
 }
 
 var timeTaken = (fn) => {
@@ -78,9 +78,29 @@ var timeTaken = (fn) => {
     console.log(`Time taken ${((end - start) / 1000).toFixed(2)} seconds`);
 }
 
+const mapReducer = (fn) => {
+    return (acc, value, index) => {
+        acc.push(fn(value, index));
+        return acc;
+    };
+}
+
+const filterReducer = (fn) => {
+    return (acc, value, index) => {
+        if (fn(value, index)) {
+            acc.push(value);
+        }
+        return acc;
+    };
+}
+
+var mapGameStates = (fn, initialState) => reduceGameStates(mapReducer(fn), [], initialState);
+var filterGameStates = (fn, initialState) => reduceGameStates(filterReducer(fn), [], initialState);
+
 # %% [markdown]
 Now let's put it to the test.
 # %% [javascript]
+
 timeTaken(() => {
     var lastIndex = reduceGameStates((acc, value, index) => {
         return index;
@@ -88,4 +108,28 @@ timeTaken(() => {
 
     console.log(`Total game states ${lastIndex + 1}`);
 });
+# %% [javascript]
+timeTaken(() => {
+    var xWins = filterGameStates(value => {
+        return getGameState(value) === 'X';
+    }).length;
 
+    console.log(`Total games where X wins ${xWins}`);
+});
+# %% [javascript]
+timeTaken(() => {
+    var oWins = filterGameStates(value => {
+        return getGameState(value) === 'O';
+    }).length;
+
+    console.log(`Total games where O wins ${oWins}`);
+});
+# %% [javascript]
+timeTaken(() => {
+    var wins = filterGameStates(value => {
+        var state = getGameState(value);
+        return state === 'X' || state === 'O';
+    }).length;
+
+    console.log(`Total games where someone wins ${wins}`);
+});

@@ -68,61 +68,43 @@ var getAllGameStates = (initialState) => {
 var allGameStates = [];
 getAllGameStates('         ');
 
-var timeTaken = (fn) => {
-    const start = performance.now();
-    fn();
-    const end = performance.now();
-    console.log(`Time taken ${((end - start) / 1000).toFixed(2)} seconds`);
-}
-
 # %% [markdown]
 Now let's put it to the test.
-# %% [javascript]
-timeTaken(() => {
-    var totalGameStates = allGameStates.length;
-    console.log(`Total games states ${totalGameStates}`);
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+console.log(`Total games states ${allGameStates.length}`);
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var xWins = allGameStates.filter(value => {
+    return getGameState(value) === 'X';
 });
-# %% [javascript]
-timeTaken(() => {
-    var xWins = allGameStates.filter(value => {
-        return getGameState(value) === 'X';
-    }).length;
 
-    console.log(`Total games where X wins ${xWins}`);
+var oWins = allGameStates.filter(value => {
+    return getGameState(value) === 'O';
 });
-# %% [javascript]
-timeTaken(() => {
-    var oWins = allGameStates.filter(value => {
-        return getGameState(value) === 'O';
-    }).length;
 
-    console.log(`Total games where O wins ${oWins}`);
+var wins = allGameStates.filter(value => {
+    var state = getGameState(value);
+    return state === 'X' || state === 'O';
 });
-# %% [javascript]
-timeTaken(() => {
-    var wins = allGameStates.filter(value => {
-        var state = getGameState(value);
-        return state === 'X' || state === 'O';
-    }).length;
 
-    console.log(`Total games where someone wins ${wins}`);
+var draws = allGameStates.filter(value => {
+    return getGameState(value) === '=';
 });
-# %% [javascript]
-timeTaken(() => {
-    var draws = allGameStates.filter(value => {
-        return getGameState(value) === '=';
-    }).length;
 
-    console.log(`Total games which draw ${draws}`);
+var games = allGameStates.filter(value => {
+    return getGameState(value) !== ' ';
 });
-# %% [javascript]
-timeTaken(() => {
-    var games = allGameStates.filter(value => {
-        return getGameState(value) !== ' ';
-    }).length;
 
-    console.log(`Total games ${games}`);
-});
+console.log(`Total games ${games.length}`);
+console.log(`    which draw ${draws.length}`);
+console.log(`    where someone wins ${wins.length}`);
+console.log(`        X wins ${xWins.length}`);
+console.log(`        O wins ${oWins.length}`);
 # %% [markdown]
 Now let's consider unique states.
 # %%--- [javascript]
@@ -130,9 +112,21 @@ Now let's consider unique states.
 #   run_on_load: true
 # ---%%
 var unique = (arr) => [...new Set(arr)];
-# %% [javascript]
-timeTaken(() => {
-    var uniqueGameStates = unique(allGameStates).length;
 
-    console.log(`Total games states ${uniqueGameStates}`);
-});
+console.log(`Unique game states ${unique(allGameStates).length}`);
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+console.log(`Total unique end of game states ${unique(games).length}`);
+console.log(`    which draw ${unique(draws).length}`);
+console.log(`    where someone wins ${unique(wins).length}`);
+console.log(`        X wins ${unique(xWins).length}`);
+console.log(`        O wins ${unique(oWins).length}`);
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var uniqueGameStates = unique(allGameStates).length;
+
+console.log(`Total games states ${uniqueGameStates}`);

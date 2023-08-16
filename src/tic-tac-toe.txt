@@ -100,13 +100,12 @@ var filterGameStates = (fn, initialState) => reduceGameStates(filterReducer(fn),
 # %% [markdown]
 Now let's put it to the test.
 # %% [javascript]
-
 timeTaken(() => {
-    var lastIndex = reduceGameStates((acc, value, index) => {
-        return index;
-    }, undefined);
+    var totalGameStates = filterGameStates(value => {
+        return true;
+    }).length;
 
-    console.log(`Total game states ${lastIndex + 1}`);
+    console.log(`Total games states ${totalGameStates}`);
 });
 # %% [javascript]
 timeTaken(() => {
@@ -132,4 +131,39 @@ timeTaken(() => {
     }).length;
 
     console.log(`Total games where someone wins ${wins}`);
+});
+# %% [javascript]
+timeTaken(() => {
+    var draws = filterGameStates(value => {
+        var state = getGameState(value);
+        return state === '=';
+    }).length;
+
+    console.log(`Total games which draw ${draws}`);
+});
+# %% [javascript]
+timeTaken(() => {
+    var games = filterGameStates(value => {
+        var state = getGameState(value);
+        return state !== ' ';
+    }).length;
+
+    console.log(`Total games ${games}`);
+});
+# %% [markdown]
+Now let's consider unique states.
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var unique = (arr) => [...new Set(arr)];
+# %% [javascript]
+timeTaken(() => {
+    var uniqueGameStates = unique(
+        filterGameStates(value => {
+            return true;
+        })
+    ).length;
+
+    console.log(`Total games states ${uniqueGameStates}`);
 });

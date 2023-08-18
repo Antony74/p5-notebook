@@ -2,7 +2,7 @@
     "name": "p5-notebook",
     "version": "1.0.0",
     "scripts": {
-        "start": "http-server ."
+        "start": "node build.js && http-server dist"
     },
     "repository": {
         "type": "git",
@@ -15,12 +15,13 @@
     "dependencies": {
         "coi-serviceworker": "^0.1.7",
         "github-fork-ribbon-css": "^0.2.3",
-        "http-server": "^14.1.1",
-        "i": "^0.3.7",
-        "npm": "^9.8.1",
         "p5": "^1.7.0",
         "starboard-notebook": "^0.15.7",
         "starboard-wrap": "^0.4.1"
+    },
+    "devDependencies": {
+        "http-server": "^14.1.1",
+        "rimraf": "^5.0.1"
     },
     "prettier": {
         "tabWidth": 4,

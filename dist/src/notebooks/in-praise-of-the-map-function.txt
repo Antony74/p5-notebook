@@ -1,0 +1,575 @@
+# %% [markdown]
+# In praise of the map function
+This is my love letter to the p5 map function, which as [the help says](https://p5js.org/reference/#/p5/map),
+re-maps a number from one range to another.  I think this is jolly useful, underrated, and frees the creative
+coder from having to think about the math.  We just have to think "I want that range there", and this frees us to
+focus on being creative.
+
+It's actually a fairly simple function, the heart of which can be implemented as follows:
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var map = (n, start1, stop1, start2, stop2) => {
+    return (n - start1) / (stop1 - start1) * (stop2 - start2) + start2;
+};
+# %% [markdown]
+Indeed it was implemented like that until an extra optional parameter `withinBounds` was added.
+I approve of this enhancement but it does make the implementation look a bit more complex than
+it actually is.
+# %% [javascript]
+_main.default.prototype.map = function (n, start1, stop1, start2, stop2, withinBounds) {
+    _main.default._validateParameters('map', arguments);
+    var newval = (n - start1) / (stop1 - start1) * (stop2 - start2) + start2;
+    if (!withinBounds) {
+        return newval;
+    }
+    if (start2 < stop2) {
+        return this.constrain(newval, start2, stop2);
+    } else {
+        return this.constrain(newval, stop2, start2);
+    }
+};
+# %% [markdown]
+In addition to [map](https://p5js.org/reference/#/p5/map), there are also two closely related functions,
+[lerp](https://p5js.org/reference/#/p5/lerp) and [norm](https://p5js.org/reference/#/p5/norm),
+which I personally never bother with because map is completely general and I prefer to explicitly
+specify ranges even when it is a zero to one range.
+
+So let's get some house-keeping out of the way, then have a look at a sketch which makes extensive
+use of the map function. 
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+// Import the p5 library, see the docs here: https://p5js.org/
+await import("../../p5/lib/p5.js");
+# %% [markdown]
+## Example sketch: Assembly Line
+Perhaps the best known and most obvious use of the map function is when you want to animate an object
+to move in a straight line from one point to another.  I do a lot of this in my assembly line animation.
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   run_on_load: true
+# ---%%
+var p5WithCleanup = (sketch, text) => {
+    if (!window.sketches) {
+        window.sketches = {};
+    }
+
+    if (window.sketches[text]) {
+        window.sketches[text].remove();
+    }
+
+    const matchedElements = Array.from(document.querySelectorAll('.cell-bottom'));
+
+    const matchedElement = matchedElements.find(elm => elm.parentElement.textContent.split(text).length > 1);
+
+    if (!matchedElement) {
+        throw new Error(`p5WithCleanup: text not found '${text}'`);
+    }
+
+    const p5Instance = new p5(sketch, matchedElement);
+    window.sketches[text] = p5Instance;
+    return p5Instance;
+};
+
+var assemblyLineSketch = p => {
+    var cycleLength = 200; // The number of frames the product is at each station
+    var stations = 3; // The number of stations in this production line
+    var transits = stations + 2; // We want to see products moving between each station, plus on and off the screen
+
+    var boundedMap = (value, start1, stop1, start2, stop2) => {
+      var value2 = p.norm(value, start1, stop1);
+      if (value2 < 0) {
+        return start2;
+      } else if (value2 < 1) {
+        return p.map(value, start1, stop1, start2, stop2);
+      } else {
+        return stop2;
+      }
+    }
+
+    var conveyorBelt01 = (value) => {
+      if (value < 0.2) {
+        // Move to product to the current station
+        return p.map(value, 0, 0.2, 0, 0.5);
+      } else if (value < 0.8) {
+        // Product is stationary at the station
+        return 0.5;
+      } else {
+        // Move the product away to the next station
+        return p.map(value, 0.8, 1, 0.5, 1);
+      }
+    }
+
+    var conveyorBeltMap = (value, start1, stop1, start2, stop2) => {
+      var value2 = conveyorBelt01(p.norm(value, start1, stop1));
+      return p.map(value2, 0, 1, start2, stop2);
+    }
+
+    var getProductX = (station, valueInCycle) => {
+      var stationWidth = p.width / stations;
+      var stationStart = p.map(station, 0, transits, -stationWidth, p.width + stationWidth);
+      var x = conveyorBeltMap(valueInCycle, 0, cycleLength, stationStart, stationStart + stationWidth); 
+      return x;
+    }
+
+    var getProductY = () => {
+      return p.height / 2;
+    }
+
+    var drawConveyorBelt = xOffset => {
+      p.fill(32);
+      p.stroke(64);
+      p.strokeWeight(10);
+      var slats = 10;
+      var inset = p.height / 2;
+      var stationWidth = p.width / stations;
+      var slatsEnd = stationWidth * transits;
+      
+      for (var slat = 0; slat < slats; ++slat)
+      {
+        var xStart = p.map(slat, 0, slats, 0, slatsEnd) + xOffset;
+        var xEnd = p.map(slat + 1, 0, slats, 0, slatsEnd) + xOffset;
+        
+        p.beginShape();
+        p.vertex(xStart, p.height);
+        p.vertex(xEnd, p.height);
+        p.vertex(xEnd - inset, p.height - inset);
+        p.vertex(xStart - inset, p.height - inset);
+        p.endShape(p.CLOSE);
+      }
+    }
+
+    var drawEye = (alpha) => {
+      var eyeWidth = 40;
+      var eyeHeight = 20;
+      var irisSize = 18;
+      var pupilSize = 6;
+
+      p.stroke(0, 0, 0, alpha);
+      p.fill(255, 255, 255, alpha);
+      p.ellipse(0, 0, eyeWidth, eyeHeight);
+      p.fill(0, 255, 255, alpha);
+      p.ellipse(0, 0, irisSize, irisSize);
+      p.fill(0, 0, 0, alpha);
+      p.ellipse(1, 1, pupilSize, pupilSize);
+    }
+
+    var drawMouth = (alpha) => {
+      var adjustment = 0.2;
+      
+      p.noFill();
+      p.stroke(255, 0, 0, alpha);
+      p.strokeWeight(10);
+      p.arc(0, 15, 70, 70, p.PI + adjustment, p.TWO_PI - adjustment);
+    }
+
+    var drawGlasses = (w) => {
+      var w2 = w * 2;
+      var w3 = w * 3;
+      p.fill(255, 128);
+      p.stroke(0, 0, 0);
+      p.strokeWeight(5);
+      p.ellipse(-w, 0, w2, w2);
+      p.ellipse( w, 0, w2, w2);
+      p.line(-w2, 0, -w3, -w);
+      p.line( w2, 0,  w3, -w);
+    };
+
+    var drawProduct = (position /* the whole number represents the station the product is at, the decimal represents how far through the station it is */) => {
+
+      // Draw a circle for the head
+      p.stroke(0);
+      p.strokeWeight(1);
+      p.fill(0xff, 0xce, 0xb4);
+      p.ellipse(0, 0, 200, 200);  
+
+      var eyeX = 35;
+      var eyeY = -30;
+      
+      // At station 1 on the assembly line (between 1.2 and 1.8) the eyes and mouth appear
+      var faceAlpha = boundedMap(position, 1.2, 1.8, 0, 1);
+      faceAlpha *= p.pow(faceAlpha, 1.5); // bend the way we fade in, because linear doesn't quite look right
+      faceAlpha *= 255;
+      
+      // At station 2 the mouth is turned around
+      var mouthRotation = boundedMap(position, 2.2, 2.8, 0, p.PI);
+
+      // At station 3 the glasses go on
+      var glassesY = boundedMap(position, 3.2, 3.8, -p.height * 0.7, eyeY);
+
+      // Draw eyes
+      p.push();
+      p.translate(-eyeX, eyeY);
+      drawEye(faceAlpha);
+      p.pop();
+      p.push();
+      p.translate(eyeX, eyeY);
+      drawEye(faceAlpha);
+      p.pop();
+
+      // Draw mouth
+      p.push();
+      p.translate(0, 40);
+      p.rotate(mouthRotation);
+      drawMouth(faceAlpha);
+      p.pop();
+
+      // Draw glasses
+      p.push();
+      p.translate(0, glassesY);
+      drawGlasses(35);
+      p.pop();
+    }
+
+    p.setup = function() {
+      p.createCanvas(900, 300);
+    };
+
+    p.draw = function() {
+      p.smooth();
+      p.background(200);
+      var valueInCycle = p.frameCount % cycleLength;
+
+      drawConveyorBelt(getProductX(0, valueInCycle));
+
+      // Draw a product at each station
+      for (var station = 0; station < transits; ++station) {
+        var position = station + p.norm(valueInCycle, 0, cycleLength);
+        p.push();
+        p.translate(getProductX(station, valueInCycle), getProductY());
+        drawProduct(position);
+        p.pop();
+      }
+    };
+};
+
+p5WithCleanup(assemblyLineSketch, 'assemblyLineSketch');
+# %% [markdown]
+This is a parody of a flow for developing desktop software.  The three stations on this assembly line
+are development, quality assurance, and documentation.  I've shared this sketch first not because
+I feel it's particularly good or creative, but it's kind of peak map function.  Everything that
+moves moves in a straight line, or rotates at a constant rate, or fades in at a constant rate.
+It's almost painful how it screams map function at you if you stare at it too long.
+
+# Example sketch: Moving a Circle
+
+Now let's look at a much simpler example of animating things in a straight line:
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var animatedCircle = p => {
+  var animationLength = 200;
+
+  p.setup = () => {
+      p.createCanvas(300, 300);
+  };
+
+  p.draw = () => {
+      p.background(200);
+
+      var xStart = 50;
+      var yStart = 250;
+      var xStop = 250;
+      var yStop = 50;
+      var frame = p.frameCount % animationLength;
+      var x = p.map(frame, 1, animationLength, xStart, xStop);
+      var y = p.map(frame, 1, animationLength, yStart, yStop);
+      p.ellipse(x, y, 20);
+  }
+}
+
+p5WithCleanup(animatedCircle, 'animatedCircle');
+# %% [markdown]
+By the way, we're in an interactive notebook.  If you haven't discovered that already, now would
+be a good time to make one small change to the code above, press the play button (bottom left of
+code editor), and see what happens.  For example you could change the start or end point of
+the animation, make the animation longer or shorter, change the ellipse to a rect, make something
+a different color, or add a second shape.
+
+I won't ask you again, and there will not be a test at the end.  But I did choose this notebook
+format especially in the hope it would minimize the barriers to creative coding.
+
+Also bear in mind there's no save option.  So if you write anything you wish to keep, please
+copy it elsewhere before you leave this page.
+
+## Example sketch: Other uses
+
+The map function is highly versatile.  I don't want to give the impression it is just for animating
+things in a straight line, so let's use the map function to vary the color and thickness along a static shape.
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var otherUses = p => {
+  p.setup = () => {
+      p.createCanvas(300, 300);
+      p.background(200);
+      p.noStroke();
+      p.colorMode(p.HSB, 700);
+
+      var steps = 100;
+      for (var n = 1; n < steps; ++n) {
+
+        p.fill(
+          p.map(n, 1, steps, 600, 0),
+          700,
+          700,
+        );
+
+        p.ellipse(
+          p.map(n, 1, steps, 50, 200),
+          p.map(n, 1, steps, 50, 200),
+          p.map(n, 1, steps, 50, 150),
+        );
+
+      }
+  };
+}
+
+p5WithCleanup(otherUses, 'otherUses');
+# %% [markdown]
+## Linear and non-linear maps
+
+I confess I prefer to call the map function 'linearMap'.  There are two reasons for this:
+
+Firstly, JavaScript already has an excellent function which is also called 'map'.  Maybe one day
+I'll write a love letter to the map/filter/reduce paradigm.
+
+Secondly, linearMap is completely unambiguous.  There are unlimited possible routes from point A
+to point B, but only one route that takes even steps in a straight line.
+
+In animation, map functions which are not linear are called [easing functions](https://easings.net/) - see
+that website for more examples.  Here I'm just going to talk about one easing function, the powerMap.
+
+## powerMap
+
+The map function breaks neatly into two parts, first the starting range in mapped on to the 
+range 0 to 1, then 0 to 1 is mapped onto the desired finishing range.  If we want to deform the map,
+then we'd best make that change in the middle, where we know the range is 0 to 1, so we
+can deform the map consistently regardless of whatever the start and finishing ranges are.
+This means that functions that return zero when passed zero, and that return one when passed one,
+are particularly valuable, because we do not wish to change our start and end points, we
+only wish to change how we get between them.
+
+Math.pow has these desired properties...
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+console.log(`Math.pow(0, 2) is ${Math.pow(0, 2)}`);
+console.log(`Math.pow(0, 3) is ${Math.pow(0, 3)}`);
+console.log(`Math.pow(0, 44) is ${Math.pow(0, 44)}`);
+console.log(`Math.pow(1, 2) is ${Math.pow(1, 2)}`);
+console.log(`Math.pow(1, 3) is ${Math.pow(1, 3)}`);
+console.log(`Math.pow(1, 44) is ${Math.pow(1, 44)}`);
+# %% [markdown]
+...and as an added bonus, the power of one produces a linear
+map.  So if we want to introduce a slight curve we set the power close to one, and if we want
+a bigger curve we set it further away from one.  (Powers below zero are beyond the scope of this
+notebook!)
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var powerMap = (power) => {
+  return (value, range1start, range1end, range2start, range2end) => {
+    const linearRatio = (value - range1start) / (range1end - range1start);
+    const ratio = Math.pow(linearRatio, power);
+    return range2start + ((range2end - range2start) * ratio);
+  };
+};
+# %% [markdown]
+powerMap has been defined as a function which returns a function (which returns a number).
+This is known as a second-order function.  Other sorts of higher-order functions also exist.
+A function that returned a function which returned a function which returned a number would
+be a third-order function.  But second-order is quite enough, thank you!
+
+We could have defined powerMap as a perfectly ordinary first-order function, just by adding
+the extra parameter (power) to the existing map function parameters.  But I didn't want to
+do this because - notice the function returned by powerMap takes exactly the same parameters
+as the map function.  So it's a drop-in replacement for (and indeed a generalization of), the
+original linear map function.
+
+Let's see it in action:
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var powerMapExample = p => {
+  p.setup = () => {
+      p.createCanvas(300, 300);
+      p.background(0);
+      p.noFill();
+      p.colorMode(p.HSB, 255);
+
+      var steps = 100;
+      var margin = 25;
+
+      var powers = [1/8, 1/3, 1/2, 1, 2, 3, 8];
+
+      powers.forEach((power, index) => {
+        var currentPowerMap = powerMap(power);
+        p.stroke(
+          p.map(index, 1, powers.length, 0, 255),
+          255,
+          255);
+
+        p.beginShape();
+
+        for (var step = 1; step <= steps; ++step) {
+          var x = p.map(step, 1, steps, margin, p.width - margin);
+          var y = currentPowerMap(step, 1, steps, margin, p.height - margin);
+          p.vertex(x, y);
+        }
+
+        p.endShape();
+      });
+  }
+}
+
+p5WithCleanup(powerMapExample, 'powerMapExample');
+# %% [markdown]
+So if a linear map doesn't give you quite the effect you're looking for, and you'd like to
+bend it a bit, you could try a powerMap.
+
+## segmentedMap
+
+Maybe I should stopped right there, but if you go map crazy like me, you might want
+to start another map where the previous one left off.  For example, you may be defining a patrol
+route that a minotaur takes through a maze - it moves in a straight line,
+but occasionally changes direction.  For that we can use a segmented map.
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var segmentedMap = (value, range1, range2, maps) => {
+  if (range1.length !== range2.length) {
+    throw new Error('segmentedMap range arrays not equal');
+  }
+
+  const n = range1.findIndex((t) => t > value);
+  switch (n) {
+    case 0:
+      return range2[0];
+    case -1:
+      return range2[range2.length - 1];
+    default:
+      var currentMap = (maps && maps[n - 1]) ? maps[n - 1] : map;
+      return currentMap(
+        value,
+        range1[n - 1],
+        range1[n],
+        range2[n - 1],
+        range2[n]
+      );
+  }
+};
+# %% [markdown]
+OK, let's use segmentedMap to draw a house.
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var segmentedMapExample = p => {
+  var segmentLength = 200;
+  var animationLength = segmentLength * 4;
+  var colorCycle = segmentLength * 4.5 * 0.1;
+
+  p.setup = () => {
+      p.createCanvas(300, 300);
+      p.colorMode(p.HSB, 255);
+      p.background(0);
+  };
+
+  p.draw = () => {
+    p.noStroke();
+    p.fill(
+      p.map(p.frameCount % colorCycle, 0, colorCycle, 0, 255),
+      255, 
+      255,
+    );
+
+    var frame = p.frameCount % animationLength;
+    var timeSegments = [0, 0.5, 1, 2, 3, 4].map(value => value * segmentLength);
+
+    var left = 75;
+    var right = 225;
+    var middle = (left + right) / 2;
+    var roofBottom = 100;
+    var roofTop = 50;
+    var bottom = 250;
+
+    var x = segmentedMap(frame, timeSegments, [left, middle, right, right, left, left]);
+    var y = segmentedMap(frame, timeSegments, [roofBottom, roofTop, roofBottom, bottom, bottom, roofBottom]);
+
+    p.ellipse(x, y, 10);
+  };
+}
+
+p5WithCleanup(segmentedMapExample, 'segmentedMapExample');
+# %% [markdown]
+Now let's give it a curved roof.
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var segmentedMapExample2 = p => {
+  var segmentLength = 200;
+  var animationLength = segmentLength * 4;
+  var colorCycle = segmentLength * 4.5 * 0.1;
+
+  var roofMap = powerMap(2);
+  var backwardsMap = fn => (n, start1, stop1, start2, stop2) => fn(n, stop1, start1, stop2, start2);
+
+  p.setup = () => {
+      p.createCanvas(300, 300);
+      p.colorMode(p.HSB, 255);
+      p.background(0);
+  };
+
+  p.draw = () => {
+    p.noStroke();
+    p.fill(
+      p.map(p.frameCount % colorCycle, 0, colorCycle, 0, 255),
+      255, 
+      255,
+    );
+
+    var frame = p.frameCount % animationLength;
+    var timeSegments = [0, 0.5, 1, 2, 3, 4].map(value => value * segmentLength);
+
+    var left = 75;
+    var right = 225;
+    var middle = (left + right) / 2;
+    var roofBottom = 100;
+    var roofTop = 50;
+    var bottom = 250;
+
+    var x = segmentedMap(
+      frame,
+      timeSegments,
+      [left, middle, right, right, left, left]
+    );
+
+    var y = segmentedMap(
+      frame,
+      timeSegments,
+      [roofBottom, roofTop, roofBottom, bottom, bottom, roofBottom],
+      [backwardsMap(roofMap), roofMap]
+    );
+
+    p.ellipse(x, y, 10);
+  };
+}
+
+p5WithCleanup(segmentedMapExample2, 'segmentedMapExample2');
+# %% [markdown]
+Thanks for reading.  I hope you have fun with the map function!

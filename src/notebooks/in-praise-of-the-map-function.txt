@@ -43,7 +43,7 @@ use of the map function.
 #   run_on_load: true
 # ---%%
 // Import the p5 library, see the docs here: https://p5js.org/
-await import("https://cdn.jsdelivr.net/npm/p5@1.7.0/lib/p5.min.js");
+await import("../../p5/lib/p5.js");
 # %% [markdown]
 ## Example sketch: Assembly Line
 Perhaps the best known and most obvious use of the map function is when you want to animate an object

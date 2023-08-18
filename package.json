@@ -2,7 +2,7 @@
     "name": "p5-notebook",
     "version": "1.0.0",
     "scripts": {
-        "start": "http-server src"
+        "start": "node build.js && http-server dist"
     },
     "repository": {
         "type": "git",
@@ -13,7 +13,15 @@
     "license": "MIT",
     "homepage": "https://github.com/Antony74/p5-notebook#readme",
     "dependencies": {
-        "http-server": "^14.1.1"
+        "coi-serviceworker": "^0.1.7",
+        "github-fork-ribbon-css": "^0.2.3",
+        "p5": "^1.7.0",
+        "starboard-notebook": "^0.15.7",
+        "starboard-wrap": "^0.4.1"
+    },
+    "devDependencies": {
+        "http-server": "^14.1.1",
+        "rimraf": "^5.0.1"
     },
     "prettier": {
         "tabWidth": 4,

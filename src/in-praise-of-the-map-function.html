@@ -1,24 +1,33 @@
-<head>
-    <link
-        rel="stylesheet"
-        href="../lib/github-fork-ribbon-css/gh-fork-ribbon.css"
-    />
-</head>
-<body>
-    <a
-        class="github-fork-ribbon right-top"
-        href="https://github.com/Antony74/p5-notebook"
-        data-ribbon="Fork me on GitHub"
-        title="Fork me on GitHub"
-        >Fork me on GitHub</a
-    >
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>In praise of the map function</title>
+        <meta charset="utf-8" />
+        <link
+            rel="stylesheet"
+            href="../lib/github-fork-ribbon-css/gh-fork-ribbon.css"
+        />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+    </head>
+    <body>
+        <a
+            class="github-fork-ribbon right-top"
+            href="https://github.com/Antony74/p5-notebook"
+            data-ribbon="Fork me on GitHub"
+            title="Fork me on GitHub"
+            >Fork me on GitHub</a
+        >
 
-    <script src="../lib/coi-serviceworker/coi-serviceworker.js"></script>
+        <script src="../lib/coi-serviceworker/coi-serviceworker.js"></script>
 
-    <div id="mount-point"></div>
+        <div id="mount-point"></div>
 
-    <script type="module">
-        import { loadNotebook } from './loadNotebook.js';
-        loadNotebook('notebooks/in-praise-of-the-map-function.txt', 'mount-point');
-    </script>
-</body>
+        <script type="module">
+            import { loadNotebook } from './loadNotebook.js';
+            loadNotebook(
+                'notebooks/in-praise-of-the-map-function.txt',
+                'mount-point'
+            );
+        </script>
+    </body>
+</html>

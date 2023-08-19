@@ -2,7 +2,7 @@
     "name": "p5-notebook",
     "version": "1.0.0",
     "scripts": {
-        "start": "node build.js && http-server dist"
+        "start": "node copyLibs.js && http-server ."
     },
     "repository": {
         "type": "git",

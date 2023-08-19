@@ -1,4 +1,4 @@
-import { StarboardEmbed } from '../node_modules/starboard-wrap/dist/index.js';
+import { StarboardEmbed } from '../lib/starboard-wrap/dist/index.js';
 
 export const loadNotebook = (url, id) => {
     fetch(url, { cache: 'no-cache' })
@@ -6,7 +6,7 @@ export const loadNotebook = (url, id) => {
         .then((notebookContent) => {
             const el = new StarboardEmbed({
                 notebookContent,
-                src: '../node_modules/starboard-notebook/dist/index.html',
+                src: '../lib/starboard-notebook/dist/index.html',
                 preventNavigationWithUnsavedChanges: true,
                 onUnsavedChangesStatusChange: (t) =>
                     console.log('Unsaved changes status change:', t),

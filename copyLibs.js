@@ -21,6 +21,7 @@ const main = async () => {
     await rimraf(libDir);
     await fsp.mkdir(libDir);
     await fsp.mkdir(path.join(libDir, 'github-fork-ribbon-css'));
+    await fsp.mkdir(path.join(libDir, 'coi-serviceworker'));
     await fsp.mkdir(path.join(libDir, 'starboard-wrap'));
     await fsp.mkdir(path.join(libDir, 'starboard-wrap', 'dist'));
     await fsp.mkdir(path.join(libDir, 'starboard-notebook'));
@@ -33,13 +34,9 @@ const main = async () => {
         path.join(libDir, 'starboard-notebook', 'dist')
     );
 
-    fsp.copyFile(
-        path.join(nodeModulesDir, 'coi-serviceworker/coi-serviceworker.js'),
-        path.join(__dirname, 'coi-serviceworker.js')
-    );
-
     [
         'github-fork-ribbon-css/gh-fork-ribbon.css',
+        'coi-serviceworker/coi-serviceworker.js',
         'starboard-wrap/dist/index.js',
         'p5/lib/p5.js',
     ].forEach((filename) =>

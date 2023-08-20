@@ -10,6 +10,8 @@ export const loadNotebook = (url, id) => {
                 preventNavigationWithUnsavedChanges: true,
                 onUnsavedChangesStatusChange: (t) =>
                     console.log('Unsaved changes status change:', t),
+                allow: '',
+                sandbox: 'allow-scripts allow-same-origin',
             });
 
             document.getElementById(id).appendChild(el);

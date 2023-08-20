@@ -6,7 +6,7 @@ export const loadNotebook = (url, id) => {
         .then((notebookContent) => {
             const el = new StarboardEmbed({
                 notebookContent,
-                src: '../lib/starboard-notebook/dist/index.html',
+                src: 'https://cdn.starboard.gg/npm/starboard-notebook@0.13.2/dist/index.html',
                 preventNavigationWithUnsavedChanges: true,
                 onUnsavedChangesStatusChange: (t) =>
                     console.log('Unsaved changes status change:', t),

@@ -14,7 +14,7 @@ const copyDir = async (src, dest) => {
         );
 };
 
-const main = async () => {
+const copyLibs = async () => {
     const nodeModulesDir = path.join(__dirname, 'node_modules');
     const libDir = path.join(__dirname, 'lib');
 
@@ -44,4 +44,4 @@ const main = async () => {
     );
 };
 
-main();
+module.exports = { copyLibs };

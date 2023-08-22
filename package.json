@@ -2,7 +2,7 @@
     "name": "p5-notebook",
     "version": "1.0.0",
     "scripts": {
-        "start": "node copyLibs.js && http-server ."
+        "start": "node build.js && http-server ."
     },
     "repository": {
         "type": "git",
@@ -20,6 +20,7 @@
     },
     "devDependencies": {
         "http-server": "^14.1.1",
+        "mustache": "^4.2.0",
         "rimraf": "^5.0.1"
     },
     "prettier": {

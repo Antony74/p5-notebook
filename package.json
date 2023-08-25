@@ -2,6 +2,7 @@
     "name": "p5-notebook",
     "version": "1.0.0",
     "scripts": {
+        "prettier": "prettier . --write",
         "start": "node build.js && http-server ."
     },
     "repository": {
@@ -21,6 +22,7 @@
     "devDependencies": {
         "http-server": "^14.1.1",
         "mustache": "^4.2.0",
+        "prettier": "^3.0.2",
         "rimraf": "^5.0.1"
     },
     "prettier": {

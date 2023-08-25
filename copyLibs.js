@@ -9,8 +9,8 @@ const copyDir = async (src, dest) => {
         .forEach((dirent) =>
             fsp.copyFile(
                 path.join(src, dirent.name),
-                path.join(dest, dirent.name)
-            )
+                path.join(dest, dirent.name),
+            ),
         );
 };
 
@@ -29,7 +29,7 @@ const copyLibs = async () => {
 
     copyDir(
         path.join(nodeModulesDir, 'starboard-notebook', 'dist'),
-        path.join(libDir, 'starboard-notebook', 'dist')
+        path.join(libDir, 'starboard-notebook', 'dist'),
     );
 
     [
@@ -39,8 +39,8 @@ const copyLibs = async () => {
     ].forEach((filename) =>
         fsp.copyFile(
             path.join(nodeModulesDir, filename),
-            path.join(libDir, filename)
-        )
+            path.join(libDir, filename),
+        ),
     );
 };
 

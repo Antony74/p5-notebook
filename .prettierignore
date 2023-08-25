@@ -1,0 +1,4 @@
+node_modules
+lib
+coi-serviceworker.js
+package-lock.json

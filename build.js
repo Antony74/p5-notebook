@@ -23,13 +23,13 @@ const notebooks = [
 const build = async () => {
     const template = await fsp.readFile(
         path.join(__dirname, 'src', 'template.html'),
-        { encoding: 'utf-8' }
+        { encoding: 'utf-8' },
     );
 
     notebooks.forEach((notebook) => {
         fsp.writeFile(
             path.join(__dirname, 'src', notebook.htmlFilename),
-            mustache.render(template, notebook)
+            mustache.render(template, notebook),
         );
     });
 
@@ -51,7 +51,7 @@ const build = async () => {
         '<ol>',
         ...notebooks.map(
             (notebook) =>
-                `<li><a href="${notebook.htmlFilename}">${notebook.title}</a></li>`
+                `<li><a href="${notebook.htmlFilename}">${notebook.title}</a></li>`,
         ),
         '</ol>',
         '</div>',

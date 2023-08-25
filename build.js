@@ -2,6 +2,7 @@ const path = require('path');
 const fsp = require('fs/promises');
 
 const mustache = require('mustache');
+const prettier = require('prettier');
 
 const { copyLibs } = require('./copyLibs');
 
@@ -21,17 +22,40 @@ const notebooks = [
 ];
 
 const build = async () => {
+    const packageJsonText = await fsp.readFile(
+        path.join(__dirname, 'package.json'),
+        {
+            encoding: 'utf-8',
+        },
+    );
+
+    const prettierOptions = {
+        ...JSON.parse(packageJsonText).prettier,
+        parser: 'html',
+    };
+
+    //
+    // Write (from template) a html page for each notebook
+    //
+
     const template = await fsp.readFile(
         path.join(__dirname, 'src', 'template.html'),
         { encoding: 'utf-8' },
     );
 
-    notebooks.forEach((notebook) => {
+    notebooks.forEach(async (notebook) => {
         fsp.writeFile(
             path.join(__dirname, 'src', notebook.htmlFilename),
-            mustache.render(template, notebook),
+            await prettier.format(
+                mustache.render(template, notebook),
+                prettierOptions,
+            ),
         );
     });
+
+    //
+    // Write contents page
+    //
 
     const header = template.split('</a>')[0].trim();
 
@@ -60,7 +84,10 @@ const build = async () => {
         '</html>',
     ].join('\n');
 
-    fsp.writeFile(path.join(__dirname, 'src/index.html'), contents);
+    fsp.writeFile(
+        path.join(__dirname, 'src/index.html'),
+        await prettier.format(contents, prettierOptions),
+    );
 };
 
 build();

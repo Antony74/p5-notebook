@@ -11,13 +11,15 @@ copyLibs();
 const notebooks = [
     {
         title: 'In praise of the map function',
-        notebookFilename: 'in-praise-of-the-map-function.txt',
-        htmlFilename: 'in-praise-of-the-map-function.html',
+        fileTitle: 'in-praise-of-the-map-function',
+    },
+    {
+        title: 'Fractal curves',
+        fileTitle: 'fractal-curves',
     },
     {
         title: 'Tic-tac-toe',
-        notebookFilename: 'tic-tac-toe.txt',
-        htmlFilename: 'tic-tac-toe.html',
+        fileTitle: 'tic-tac-toe',
     },
 ];
 
@@ -45,7 +47,7 @@ const build = async () => {
 
     notebooks.forEach(async (notebook) => {
         fsp.writeFile(
-            path.join(__dirname, 'src', notebook.htmlFilename),
+            path.join(__dirname, 'src', `${notebook.fileTitle}.html`),
             await prettier.format(
                 mustache.render(template, notebook),
                 prettierOptions,
@@ -75,7 +77,7 @@ const build = async () => {
         '<ol>',
         ...notebooks.map(
             (notebook) =>
-                `<li><a href="${notebook.htmlFilename}">${notebook.title}</a></li>`,
+                `<li><a href="${notebook.fileTitle}.html">${notebook.title}</a></li>`,
         ),
         '</ol>',
         '<h2>About</h2>',

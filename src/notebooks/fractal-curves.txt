@@ -1,0 +1,3 @@
+# %% [markdown]
+# Fractal curves
+When I wrote [in praise of the map function](./in-praise-of-the-map-function.html)

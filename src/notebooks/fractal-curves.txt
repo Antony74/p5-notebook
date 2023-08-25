@@ -1,3 +1,189 @@
 # %% [markdown]
 # Fractal curves
-When I wrote [in praise of the map function](./in-praise-of-the-map-function.html)
+When I wrote [in praise of the map function](./in-praise-of-the-map-function.html) I proposed
+a modest extension of the p5 map function called segmentedMap.  Now that was supposed to be
+the end of it, but while I was walking the dog it suddenly occurred to me that we can call
+it recursively in order to draw and do creative things with fractal curves such as the
+Koch Snowflake and the Hilbert Curve.
+
+## Vectorising the map function
+
+Actually I was wrong - a (scalar) map function variant gives you an intresting and creative
+way of getting from point A to point B, but to draw these curves we sometimes need to go
+sideways.. which means we need to know which way sideways is... something we need both the
+x and y coordinate in order to determine.
+
+So lets write a version of the map function that uses vectors, rather than a single (scalar)
+value for its target range.  This is probably a good thing anyway, as intermediate to
+advanced programmers usually find it more convienant and they have less they need to think
+about when coding with vectors.
+
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   run_on_load: true
+# ---%%
+var p5WithCleanup = (sketch, text) => {
+    if (!window.sketches) {
+        window.sketches = {};
+    }
+
+    if (window.sketches[text]) {
+        window.sketches[text].remove();
+    }
+
+    const matchedElements = Array.from(document.querySelectorAll('.cell-bottom'));
+
+    const matchedElement = matchedElements.find(elm => elm.parentElement.textContent.split(text).length > 1);
+
+    if (!matchedElement) {
+        throw new Error(`p5WithCleanup: text not found '${text}'`);
+    }
+
+    const p5Instance = new p5(sketch, matchedElement);
+    window.sketches[text] = p5Instance;
+    return p5Instance;
+};
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+await import("../../p5/lib/p5.js");
+
+var createVectorMapFn = p => (n, start1, stop1, start2, stop2) => {
+    return p.createVector(
+        p.map(n, start1, stop1, start2.x, stop2.x),
+        p.map(n, start1, stop1, start2.y, stop2.y)
+    );
+};
+# %% [markdown]
+Nothing exciting there, we're just calling the map function twice, first to map the x-coordinate
+then to map the y-coordinate, and creating a new vector from the result.
+
+## Example sketch: Moving a Circle
+
+This was the most simple animation I could think of with the (scalar) map function:
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var animatedCircle = p => {
+  var animationLength = 200;
+
+  p.setup = () => {
+      p.createCanvas(300, 300);
+  };
+
+  p.draw = () => {
+      p.background(200);
+
+      var xStart = 50;
+      var yStart = 250;
+      var xStop = 250;
+      var yStop = 50;
+      var frame = p.frameCount % animationLength;
+      var x = p.map(frame, 1, animationLength, xStart, xStop);
+      var y = p.map(frame, 1, animationLength, yStart, yStop);
+      p.ellipse(x, y, 20);
+  }
+}
+
+p5WithCleanup(animatedCircle, 'animatedCircle');
+# %% [markdown]
+Here's what it looks like if we use vectorMap instead:
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var animatedCircleVectorised = p => {
+  var animationLength = 200;
+  var vectorMap = createVectorMapFn(p);
+
+  p.setup = () => {
+      p.createCanvas(300, 300);
+  };
+
+  p.draw = () => {
+      p.background(200);
+
+      var start = p.createVector(50, 250);
+      var stop = p.createVector(250, 50);
+      var frame = p.frameCount % animationLength;
+
+      var vec = vectorMap(frame, 1, animationLength, start, stop);
+
+      p.ellipse(vec.x, vec.y, 20);
+  }
+}
+
+p5WithCleanup(animatedCircleVectorised, 'animatedCircleVectorised');
+# %% [markdown]
+Exactly the same boring animation, but the code is slightly more elegant, maybe?
+
+## A single iteration of the Koch Snowflake
+
+The algorithm for the [Koch Snowflake](https://en.wikipedia.org/wiki/Koch_snowflake)
+is to recursively mutate each line segment by replacing the middle third with the
+other two sides of an equilateral triangle.  I'd probably better draw (a non-recursive
+example) of that:
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var heightOfEquilateralTriangle = sideLength => Math.sqrt(3) * sideLength / 2;
+
+var singleKochSnowflakeStep = p => {
+  var animationLength = 200;
+  var vectorMap = createVectorMapFn(p);
+
+  p.setup = () => {
+      p.createCanvas(300, 300);
+  };
+
+  p.draw = () => {
+      p.background(200);
+
+      var frame = p.frameCount % animationLength;
+      var drawLineSegment = frame < (animationLength / 2);
+
+      var a = p.createVector(150, 250);
+      var e = p.createVector(150, 50);
+
+      var b = vectorMap(1, 0, 3, a, e);
+      var d = vectorMap(2, 0, 3, a, e);
+
+      var sideLength = d.copy().sub(b).mag();
+
+      var c = p.createVector(150 - heightOfEquilateralTriangle(sideLength), p.map(1, 0, 2, a.y, e.y));
+
+      p.strokeWeight(2);
+      p.noFill();
+
+      if (drawLineSegment) {
+        // Draw line segment
+        p.beginShape();
+        [a, e].forEach(point => p.vertex(point.x, point.y));
+        p.endShape();
+      } else {
+        // Replace middle third with the other two sides of an equilateral triangle
+        p.beginShape();
+        [a, b, c, d, e].forEach(point => p.vertex(point.x, point.y));
+        p.endShape();
+      }
+  }  
+}
+p5WithCleanup(singleKochSnowflakeStep, 'singleKochSnowflakeStep');
+# %% [markdown]
+How did I know the height of an equilateral triangle was `Math.sqrt(3) * sideLength / 2`?
+
+I looked it up online, of course ;-)
+
+You can also split the triangle into two right-angled triangles and use Pythagoras' theorem:
+
+    a^2 = b^2 + c^2
+
+Subsitute the values related to this problem:
+
+    sideLength^2 = (sideLength / 2)^2 + heightOfEquilateralTriangle
+
+Then re-arrange until you have `heightOfEquilateralTriangle = Math.sqrt(3) * sideLength / 2`

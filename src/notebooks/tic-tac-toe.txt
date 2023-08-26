@@ -2,7 +2,6 @@
 # properties:
 #   run_on_load: true
 # ---%%
-
 var winningCells = [
     [0, 1, 2],
     [3, 4, 5],
@@ -21,82 +20,96 @@ var winningCells = [
 //     'X' - X wins
 //     'O' - O wins
 //     '=' - Draw
-var getGameState = board => {
+var getGameState = (board) => {
     if (board.length !== 9) {
         throw new Error(`${board} is not a tic-tac-toe board`);
     }
 
-    for([a, b, c] of winningCells) {
-        if (board[a] !== ' ' && board[a] === board[b] && board[a] === board[c]) {
+    for ([a, b, c] of winningCells) {
+        if (
+            board[a] !== ' ' &&
+            board[a] === board[b] &&
+            board[a] === board[c]
+        ) {
             return board[a];
         }
     }
 
     // Draw or ongoing?
 
-    return board.split('').filter(pos => pos !== ' ').length === 9 ? '=' : ' ';
-}
+    return board.split('').filter((pos) => pos !== ' ').length === 9
+        ? '='
+        : ' ';
+};
 
-var nextGameStates = board => {
+var nextGameStates = (board) => {
     if (getGameState(board) !== ' ') {
         return []; // Game over
     }
 
     boardArray = board.split('');
 
-    var whoseMove = boardArray.filter(o => o === 'O').length < boardArray.filter( x => x === 'X').length ? 'O' : 'X';
+    var whoseMove =
+        boardArray.filter((o) => o === 'O').length <
+        boardArray.filter((x) => x === 'X').length
+            ? 'O'
+            : 'X';
 
     return boardArray.reduce((acc, value, index) => {
         if (value === ' ') {
-            const newBoard = board.substring(0, index) + whoseMove + board.substring(index + 1);;
+            const newBoard =
+                board.substring(0, index) +
+                whoseMove +
+                board.substring(index + 1);
             return [...acc, newBoard];
         } else {
             return acc;
         }
     }, []);
-}
+};
 
 var getAllGameStates = (initialState) => {
-
     allGameStates.push(initialState);
 
     return nextGameStates(initialState).forEach((value) => {
         getAllGameStates(value);
     });
-}
+};
 
 var allGameStates = [];
 getAllGameStates('         ');
 
 # %% [markdown]
 Now let's put it to the test.
+
 # %%--- [javascript]
 # properties:
 #   run_on_load: true
 # ---%%
 console.log(`Total games states ${allGameStates.length}`);
+
 # %%--- [javascript]
 # properties:
 #   run_on_load: true
 # ---%%
-var xWins = allGameStates.filter(value => {
+var xWins = allGameStates.filter((value) => {
     return getGameState(value) === 'X';
 });
 
-var oWins = allGameStates.filter(value => {
+var oWins = allGameStates.filter((value) => {
     return getGameState(value) === 'O';
 });
 
-var wins = allGameStates.filter(value => {
+var wins = allGameStates.filter((value) => {
     var state = getGameState(value);
     return state === 'X' || state === 'O';
 });
 
-var draws = allGameStates.filter(value => {
+var draws = allGameStates.filter((value) => {
     return getGameState(value) === '=';
 });
 
-var games = allGameStates.filter(value => {
+var games = allGameStates.filter((value) => {
     return getGameState(value) !== ' ';
 });
 
@@ -105,8 +118,10 @@ console.log(`    which draw ${draws.length}`);
 console.log(`    where someone wins ${wins.length}`);
 console.log(`        X wins ${xWins.length}`);
 console.log(`        O wins ${oWins.length}`);
+
 # %% [markdown]
 Now let's consider unique states.
+
 # %%--- [javascript]
 # properties:
 #   run_on_load: true
@@ -114,6 +129,7 @@ Now let's consider unique states.
 var unique = (arr) => [...new Set(arr)];
 
 console.log(`Unique game states ${unique(allGameStates).length}`);
+
 # %%--- [javascript]
 # properties:
 #   run_on_load: true
@@ -123,6 +139,7 @@ console.log(`    which draw ${unique(draws).length}`);
 console.log(`    where someone wins ${unique(wins).length}`);
 console.log(`        X wins ${unique(xWins).length}`);
 console.log(`        O wins ${unique(oWins).length}`);
+
 # %%--- [javascript]
 # properties:
 #   run_on_load: true

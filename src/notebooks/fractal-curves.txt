@@ -1,5 +1,5 @@
 # %% [markdown]
-# Fractal curves
+# Fractal curves with segmentedMap
 When I wrote [in praise of the map function](./in-praise-of-the-map-function.html) I proposed
 a modest extension of the p5 map function called segmentedMap.  Now that was supposed to be
 the end of it, but while I was walking the dog it suddenly occurred to me that we can call
@@ -8,7 +8,7 @@ Koch Snowflake and the Hilbert Curve.
 
 ## Vectorising the map function
 
-Actually I was wrong - a (scalar) map function variant gives you an intresting and creative
+Actually I was wrong - a variant of the (scalar) map function gives you an intresting and creative
 way of getting from point A to point B, but to draw these curves we sometimes need to go
 sideways.. which means we need to know which way sideways is... something we need both the
 x and y coordinate in order to determine.
@@ -48,14 +48,12 @@ var p5WithCleanup = (sketch, text) => {
 # properties:
 #   run_on_load: true
 # ---%%
-await import("../../p5/lib/p5.js");
-
-var createVectorMapFn = p => (n, start1, stop1, start2, stop2) => {
+var vectorMap (n, start1, stop1, start2, stop2) => {
     return p.createVector(
         p.map(n, start1, stop1, start2.x, stop2.x),
         p.map(n, start1, stop1, start2.y, stop2.y)
     );
-};
+}
 # %% [markdown]
 Nothing exciting there, we're just calling the map function twice, first to map the x-coordinate
 then to map the y-coordinate, and creating a new vector from the result.

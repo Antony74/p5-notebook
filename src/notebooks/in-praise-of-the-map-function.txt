@@ -442,7 +442,7 @@ bend it a bit, you could try a powerMap.
 
 ## segmentedMap
 
-Maybe I should stopped right there, but if you go map crazy like me, you might want
+Maybe I should have stopped right there, but if you go map crazy like me, you might want
 to start another map where the previous one left off.  For example, you may be defining a patrol
 route that a minotaur takes through a maze - it moves in a straight line,
 but occasionally changes direction.  For that we can use a segmented map.

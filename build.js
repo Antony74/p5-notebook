@@ -3,6 +3,7 @@ const fsp = require('fs/promises');
 
 const mustache = require('mustache');
 const prettier = require('prettier');
+const markdownSpellcheck = require('markdown-spellcheck').default;
 
 const { copyLibs } = require('./copyLibs');
 const { parseNotebook } = require('./parseNotebook');
@@ -113,6 +114,39 @@ const build = async () => {
 
         const textArray = await Promise.all(
             parseNotebook(text).map(async (section) => {
+                //
+                // Spellcheck markdown sections of notebook
+                //
+
+                if (section.type === 'markdown') {
+                    result = markdownSpellcheck.spell(section.text, {
+                        dictionary: {
+                            language: 'en-us',
+                        },
+                    });
+                    result.forEach(({ word }) => {
+                        switch (word) {
+                            case 'p5':
+                            case 'lerp':
+                            case 'linearMap':
+                            case 'powerMap':
+                            case 'Math.pow':
+                            case 'segmentedMap':
+                            case 'vectorMap':
+                            case 'sideLength':
+                            case 'heightOfEquilateralTriangle':
+                            case 'minotaur':
+                                break; // special case
+                            default:
+                                console.warn(`Word ${word} not recognised`);
+                        }
+                    });
+                }
+
+                //
+                // Run prettier on JavaScript and Markdown sections of the notebook
+                //
+
                 switch (section.type) {
                     case 'babel':
                     case 'markdown':

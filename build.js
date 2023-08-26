@@ -3,10 +3,9 @@ const fsp = require('fs/promises');
 
 const mustache = require('mustache');
 const prettier = require('prettier');
-const markdownSpellcheck = require('markdown-spellcheck').default;
 
 const { copyLibs } = require('./copyLibs');
-const { parseNotebook } = require('./parseNotebook');
+const { parseNotebook, spellcheckMarkdown } = require('./parseNotebook');
 
 copyLibs();
 
@@ -119,28 +118,7 @@ const build = async () => {
                 //
 
                 if (section.type === 'markdown') {
-                    result = markdownSpellcheck.spell(section.text, {
-                        dictionary: {
-                            language: 'en-us',
-                        },
-                    });
-                    result.forEach(({ word }) => {
-                        switch (word) {
-                            case 'p5':
-                            case 'lerp':
-                            case 'linearMap':
-                            case 'powerMap':
-                            case 'Math.pow':
-                            case 'segmentedMap':
-                            case 'vectorMap':
-                            case 'sideLength':
-                            case 'heightOfEquilateralTriangle':
-                            case 'minotaur':
-                                break; // special case
-                            default:
-                                console.warn(`Word ${word} not recognised`);
-                        }
-                    });
+                    spellcheckMarkdown(section.text);
                 }
 
                 //

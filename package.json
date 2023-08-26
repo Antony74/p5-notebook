@@ -26,8 +26,8 @@
         "prettier": "^3.0.2",
         "rimraf": "^5.0.1"
     },
-    "resolutions": {
-        "marked": "0.3.19"
+    "overrides": {
+        "marked": "7.0.4"
     },
     "prettier": {
         "tabWidth": 4,

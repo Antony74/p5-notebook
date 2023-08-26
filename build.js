@@ -15,7 +15,7 @@ const notebooks = [
         fileTitle: 'in-praise-of-the-map-function',
     },
     {
-        title: 'Fractal curves',
+        title: 'Fractal curves with segmentedMap',
         fileTitle: 'fractal-curves',
     },
     {

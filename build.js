@@ -31,10 +31,7 @@ const build = async () => {
         },
     );
 
-    const prettierOptions = {
-        ...JSON.parse(packageJsonText).prettier,
-        parser: 'html',
-    };
+    const prettierOptions = JSON.parse(packageJsonText).prettier;
 
     //
     // Write (from template) a html page for each notebook
@@ -48,10 +45,10 @@ const build = async () => {
     notebooks.forEach(async (notebook) => {
         fsp.writeFile(
             path.join(__dirname, 'src', `${notebook.fileTitle}.html`),
-            await prettier.format(
-                mustache.render(template, notebook),
-                prettierOptions,
-            ),
+            await prettier.format(mustache.render(template, notebook), {
+                ...prettierOptions,
+                parser: 'html',
+            }),
         );
     });
 
@@ -97,7 +94,7 @@ const build = async () => {
 
     fsp.writeFile(
         path.join(__dirname, 'src/index.html'),
-        await prettier.format(contents, prettierOptions),
+        await prettier.format(contents, { ...prettierOptions, parser: 'html' }),
     );
 };
 

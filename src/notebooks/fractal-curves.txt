@@ -7,7 +7,7 @@ When I wrote [in praise of the map function](./in-praise-of-the-map-function.htm
 
 Actually I was wrong - a variant of the (scalar) map function gives you an interesting and creative way of getting from point A to point B, but to draw these curves we sometimes need to go sideways.. which means we need to know which way sideways is... something we need both the x and y coordinate in order to determine.
 
-So lets write a version of the map function that uses vectors, rather than a single (scalar) value for its target range. This is probably a good thing anyway, as intermediate to advanced programmers usually find it more convenient and they have less they need to think about when coding with vectors.
+So lets write a version of the map function that uses vectors, rather than a single (scalar) value for its target range. This is probably a good thing anyway, as intermediate to advanced programmers usually find it more convenient to think and code with vectors.
 
 # %%--- [javascript]
 # properties:
@@ -126,7 +126,7 @@ Exactly the same boring animation, but the code is slightly more elegant, maybe?
 
 ## A single iteration of the Koch Snowflake
 
-The algorithm for the [Koch Snowflake](https://en.wikipedia.org/wiki/Koch_snowflake) is to recursively mutate each line segment by replacing the middle third with the other two sides of an equilateral triangle. I'd probably better draw (a non-recursive example) of that:
+The algorithm for the [Koch Snowflake](https://en.wikipedia.org/wiki/Koch_snowflake) is to recursively mutate each line segment by replacing the middle third of it with the other two sides of an equilateral triangle. I'd probably better draw (a non-recursive example) of that:
 
 # %%--- [javascript]
 # properties:
@@ -181,16 +181,18 @@ var singleKochSnowflakeStep = (p) => {
 p5WithCleanup(singleKochSnowflakeStep, 'singleKochSnowflakeStep');
 
 # %% [markdown]
-How did I know the height of an equilateral triangle was `Math.sqrt(3) * sideLength / 2`?
+How did I know the height of an equilateral triangle was `Math.sqrt(3) * sideLength / 2`? I looked it up online, of course ;-)
 
-I looked it up online, of course ;-)
+You can also split the equilateral triangle into two right-angled triangles and use Pythagoras' theorem...
 
-You can also split the triangle into two right-angled triangles and use Pythagoras' theorem:
-
+```
 a^2 = b^2 + c^2
+```
 
-Substitute the values related to this problem:
+...by substituting in the values related to this problem...
 
+```
 sideLength^2 = (sideLength / 2)^2 + heightOfEquilateralTriangle
+```
 
-Then re-arrange until you have `heightOfEquilateralTriangle = Math.sqrt(3) * sideLength / 2`
+...then re-arranging until you have `heightOfEquilateralTriangle = Math.sqrt(3) * sideLength / 2`

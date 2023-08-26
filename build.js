@@ -111,16 +111,22 @@ const build = async () => {
 
         const text = await fsp.readFile(filename, { encoding: 'utf-8' });
 
-        const output = parseNotebook(text)
-            .map((section) => {
+        const textArray = await Promise.all(
+            parseNotebook(text).map(async (section) => {
                 switch (section.type) {
+                    case 'babel':
+                    case 'markdown':
+                        return await prettier.format(section.text, {
+                            ...prettierOptions,
+                            parser: section.type,
+                        });
                     default:
                         return section.text;
                 }
-            })
-            .join('');
+            }),
+        );
 
-        fsp.writeFile(filename, output);
+        fsp.writeFile(filename, textArray.join('\n'));
     });
 };
 

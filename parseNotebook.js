@@ -3,7 +3,8 @@ const parseNotebook = (notebookText) => {
     const addLine = (s) => (output[output.length - 1].text += '\n' + s);
 
     for (text of notebookText.split('\n')) {
-        switch (text.trim()) {
+        text = text.trim();
+        switch (text) {
             case '# %%--- [javascript]':
                 output.push({ type: 'header', text });
                 break;

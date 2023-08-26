@@ -95,6 +95,7 @@ const spellcheckMarkdown = (md) => {
             case '+':
             case '?':
             case ';':
+            case '2':
                 words.push('');
                 break;
             default:
@@ -127,6 +128,7 @@ const spellcheckMarkdown = (md) => {
                 case 'sqrt':
                 case 'withinBounds':
                 case 'Vectorizing':
+                case 'kochSnowflakeMap':
                     break; // special case
                 default:
                     console.warn(`Word ${word} not recognised`);

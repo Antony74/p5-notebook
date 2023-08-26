@@ -198,7 +198,9 @@ sideLength^2 = (sideLength / 2)^2 + heightOfEquilateralTriangle
 ...then re-arranging until you have `heightOfEquilateralTriangle = Math.sqrt(3) * sideLength / 2`
 
 ## segmentedMap
+
 We're nearly ready to express the Koch Snowflake as a map, but first we need to bring the segmentedMap function in:
+
 # %%--- [javascript]
 # properties:
 #   run_on_load: true
@@ -229,5 +231,38 @@ var segmentedMap = (value, range1, range2, maps) => {
             );
     }
 };
+
 # %% [markdown]
-This is the same code I used in [in praise of the map function](./in-praise-of-the-map-function.html).  I haven't had to adjust it at all to allow for the fact we're now working with vectors, because the elements of range2 just get passed to another map without being used in any other way, and the returned value just gets passed through too.
+This is the same code I used in [in praise of the map function](./in-praise-of-the-map-function.html). I haven't had to adjust it at all to allow for the fact we're now working with vectors, because the elements of range2 just get passed to another map without being used in any other way, and the returned value just gets passed through too.
+
+# kochSnowflakeMap
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var createKochSnowflakemapFn = (p) => {
+    var vectorMap = createVectorMapFn(p);
+
+    var kochSnowflakeMap = (depth) => (n, start1, stop1, start2, stop2) => {
+        var ratio = map(n, start1, stop1, 0, 1);
+
+        var b = vectorMap(2, 0, 6, start2, stop2);
+        var c = vectorMap(3, 0, 6, start2, stop2);
+        var d = vectorMap(4, 0, 6, start2, stop2);
+
+        var bdNormal = d.copy().sub(b).rotate(p.HALF_PI);
+        bdNormal.setMag(bdNormal.mag() / 2);
+
+        c.add(bdNormal);
+
+        var nextMap = depth <= 1 ? vectorMap : kochSnowflakeMap(depth - 1);
+
+        return segmentedMap(
+            ratio,
+            [0, 0.25, 0.5, 0.75, 1],
+            [start2, b, c, d, stop2],
+            [nextMap, nextMap, nextMap, nextMap],
+        );
+    };
+};

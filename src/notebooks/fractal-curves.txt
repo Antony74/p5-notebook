@@ -48,12 +48,14 @@ var p5WithCleanup = (sketch, text) => {
 # properties:
 #   run_on_load: true
 # ---%%
-var vectorMap (n, start1, stop1, start2, stop2) => {
+await import("../../p5/lib/p5.js");
+
+var createVectorMapFn = p => (n, start1, stop1, start2, stop2) => {
     return p.createVector(
         p.map(n, start1, stop1, start2.x, stop2.x),
         p.map(n, start1, stop1, start2.y, stop2.y)
     );
-}
+};
 # %% [markdown]
 Nothing exciting there, we're just calling the map function twice, first to map the x-coordinate
 then to map the y-coordinate, and creating a new vector from the result.

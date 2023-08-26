@@ -1,9 +1,6 @@
 # %% [markdown]
 # In praise of the map function
-This is my love letter to the p5 map function, which as [the help says](https://p5js.org/reference/#/p5/map),
-re-maps a number from one range to another.  I think this is jolly useful, underrated, and frees the creative
-coder from having to think about the math.  We just have to think "I want that range there", and this frees us to
-focus on being creative.
+This is my love letter to the p5 map function, which as [the help says](https://p5js.org/reference/#/p5/map), re-maps a number from one range to another.  I think this is jolly useful, underrated, and frees the creative coder from having to think about the math.  We just have to think "I want that range there", and this frees us to focus on being creative.
 
 It's actually a fairly simple function, the heart of which can be implemented as follows:
 # %%--- [javascript]
@@ -14,9 +11,7 @@ var map = (n, start1, stop1, start2, stop2) => {
     return (n - start1) / (stop1 - start1) * (stop2 - start2) + start2;
 };
 # %% [markdown]
-Indeed it was implemented like that until an extra optional parameter `withinBounds` was added.
-I approve of this enhancement but it does make the implementation look a bit more complex than
-it actually is.
+Indeed it was implemented like that until an extra optional parameter `withinBounds` was added.  I approve of this enhancement but it does make the implementation look a bit more complex than it actually is.
 # %% [javascript]
 _main.default.prototype.map = function (n, start1, stop1, start2, stop2, withinBounds) {
     _main.default._validateParameters('map', arguments);
@@ -31,13 +26,9 @@ _main.default.prototype.map = function (n, start1, stop1, start2, stop2, withinB
     }
 };
 # %% [markdown]
-In addition to [map](https://p5js.org/reference/#/p5/map), there are also two closely related functions,
-[lerp](https://p5js.org/reference/#/p5/lerp) and [norm](https://p5js.org/reference/#/p5/norm),
-which I personally never bother with because map is completely general and I prefer to explicitly
-specify ranges even when it is a zero to one range.
+In addition to [map](https://p5js.org/reference/#/p5/map), there are also two closely related functions, [lerp](https://p5js.org/reference/#/p5/lerp) and [norm](https://p5js.org/reference/#/p5/norm), which I personally never bother with because map is completely general and I prefer to explicitly specify ranges even when it is a zero to one range.
 
-So let's get some house-keeping out of the way, then have a look at a sketch which makes extensive
-use of the map function. 
+So let's get some house-keeping out of the way, then have a look at a sketch which makes extensive use of the map function. 
 # %%--- [javascript]
 # properties:
 #   run_on_load: true
@@ -46,8 +37,7 @@ use of the map function.
 await import("../../p5/lib/p5.js");
 # %% [markdown]
 ## Example sketch: Assembly Line
-Perhaps the best known and most obvious use of the map function is when you want to animate an object
-to move in a straight line from one point to another.  I do a lot of this in my assembly line animation.
+Perhaps the best known and most obvious use of the map function is when you want to animate an object to move in a straight line from one point to another.  I do a lot of this in my assembly line animation.
 # %%--- [javascript]
 # properties:
 #   top_hidden: true
@@ -249,11 +239,7 @@ var assemblyLineSketch = p => {
 
 p5WithCleanup(assemblyLineSketch, 'assemblyLineSketch');
 # %% [markdown]
-This is a parody of a flow for developing desktop software.  The three stations on this assembly line
-are development, quality assurance, and documentation.  I've shared this sketch first not because
-I feel it's particularly good or creative, but it's kind of peak map function.  Everything that
-moves moves in a straight line, or rotates at a constant rate, or fades in at a constant rate.
-It's almost painful how it screams map function at you if you stare at it too long.
+This is a parody of a flow for developing desktop software.  The three stations on this assembly line are development, quality assurance, and documentation.  I've shared this sketch first not because I feel it's particularly good or creative, but it's kind of peak map function.  Everything that moves moves in a straight line, or rotates at a constant rate, or fades in at a constant rate.  It's almost painful how it screams map function at you if you stare at it too long.
 
 # Example sketch: Moving a Circle
 
@@ -285,22 +271,15 @@ var animatedCircle = p => {
 
 p5WithCleanup(animatedCircle, 'animatedCircle');
 # %% [markdown]
-By the way, we're in an interactive notebook.  If you haven't discovered that already, now would
-be a good time to make one small change to the code above, press the play button (bottom left of
-code editor), and see what happens.  For example you could change the start or end point of
-the animation, make the animation longer or shorter, change the ellipse to a rect, make something
-a different color, or add a second shape.
+By the way, we're in an interactive notebook.  If you haven't discovered that already, now would be a good time to make one small change to the code above, press the play button (bottom left of code editor), and see what happens.  For example you could change the start or end point of the animation, make the animation longer or shorter, change the ellipse to a rect, make something a different color, or add a second shape.
 
-I won't ask you again, and there will not be a test at the end.  But I did choose this notebook
-format especially in the hope it would minimize the barriers to creative coding.
+I won't ask you again, and there will not be a test at the end.  But I did choose this notebook format especially in the hope it would minimize the barriers to creative coding.
 
-Also bear in mind there's no save option.  So if you write anything you wish to keep, please
-copy it elsewhere before you leave this page.
+Also bear in mind there's no save option.  So if you write anything you wish to keep, please copy it elsewhere before you leave this page.
 
 ## Example sketch: Other uses
 
-The map function is highly versatile.  I don't want to give the impression it is just for animating
-things in a straight line, so let's use the map function to vary the color and thickness along a static shape.
+The map function is highly versatile.  I don't want to give the impression it is just for animating things in a straight line, so let's use the map function to vary the color and thickness along a static shape.
 # %%--- [javascript]
 # properties:
 #   run_on_load: true
@@ -337,24 +316,15 @@ p5WithCleanup(otherUses, 'otherUses');
 
 I confess I prefer to call the map function 'linearMap'.  There are two reasons for this:
 
-Firstly, JavaScript already has an excellent function which is also called 'map'.  Maybe one day
-I'll write a love letter to the map/filter/reduce paradigm.
+Firstly, JavaScript already has an excellent function which is also called 'map'.  Maybe one day I'll write a love letter to the map/filter/reduce paradigm.
 
-Secondly, linearMap is completely unambiguous.  There are unlimited possible routes from point A
-to point B, but only one route that takes even steps in a straight line.
+Secondly, linearMap is completely unambiguous.  There are unlimited possible routes from point A to point B, but only one route that takes even steps in a straight line.
 
-In animation, map functions which are not linear are called [easing functions](https://easings.net/) - see
-that website for more examples.  Here I'm just going to talk about one easing function, the powerMap.
+In animation, map functions which are not linear are called [easing functions](https://easings.net/) - see that website for more examples.  Here I'm just going to talk about one easing function, the powerMap.
 
 ## powerMap
 
-The map function breaks neatly into two parts, first the starting range in mapped on to the 
-range 0 to 1, then 0 to 1 is mapped onto the desired finishing range.  If we want to deform the map,
-then we'd best make that change in the middle, where we know the range is 0 to 1, so we
-can deform the map consistently regardless of whatever the start and finishing ranges are.
-This means that functions that return zero when passed zero, and that return one when passed one,
-are particularly valuable, because we do not wish to change our start and end points, we
-only wish to change how we get between them.
+The map function breaks neatly into two parts, first the starting range in mapped on to the  range 0 to 1, then 0 to 1 is mapped onto the desired finishing range.  If we want to deform the map, then we'd best make that change in the middle, where we know the range is 0 to 1, so we can deform the map consistently regardless of whatever the start and finishing ranges are.  This means that functions that return zero when passed zero, and that return one when passed one, are particularly valuable, because we do not wish to change our start and end points, we only wish to change how we get between them.
 
 Math.pow has these desired properties...
 
@@ -369,10 +339,7 @@ console.log(`Math.pow(1, 2) is ${Math.pow(1, 2)}`);
 console.log(`Math.pow(1, 3) is ${Math.pow(1, 3)}`);
 console.log(`Math.pow(1, 44) is ${Math.pow(1, 44)}`);
 # %% [markdown]
-...and as an added bonus, the power of one produces a linear
-map.  So if we want to introduce a slight curve we set the power close to one, and if we want
-a bigger curve we set it further away from one.  (Powers below zero are beyond the scope of this
-notebook!)
+...and as an added bonus, the power of one produces a linear map.  So if we want to introduce a slight curve we set the power close to one, and if we want a bigger curve we set it further away from one.  (Powers below zero are beyond the scope of this notebook!)
 
 # %%--- [javascript]
 # properties:
@@ -386,16 +353,9 @@ var powerMap = (power) => {
   };
 };
 # %% [markdown]
-powerMap has been defined as a function which returns a function (which returns a number).
-This is known as a second-order function.  Other sorts of higher-order functions also exist.
-A function that returned a function which returned a function which returned a number would
-be a third-order function.  But second-order is quite enough, thank you!
+powerMap has been defined as a function which returns a function (which returns a number).  This is known as a second-order function.  Other sorts of higher-order functions also exist.  A function that returned a function which returned a function which returned a number would be a third-order function.  But second-order is quite enough, thank you!
 
-We could have defined powerMap as a perfectly ordinary first-order function, just by adding
-the extra parameter (power) to the existing map function parameters.  But I didn't want to
-do this because - notice the function returned by powerMap takes exactly the same parameters
-as the map function.  So it's a drop-in replacement for (and indeed a generalization of), the
-original linear map function.
+We could have defined powerMap as a perfectly ordinary first-order function, just by adding the extra parameter (power) to the existing map function parameters.  But I didn't want to do this because - notice the function returned by powerMap takes exactly the same parameters as the map function.  So it's a drop-in replacement for (and indeed a generalization of), the original linear map function.
 
 Let's see it in action:
 
@@ -437,15 +397,11 @@ var powerMapExample = p => {
 
 p5WithCleanup(powerMapExample, 'powerMapExample');
 # %% [markdown]
-So if a linear map doesn't give you quite the effect you're looking for, and you'd like to
-bend it a bit, you could try a powerMap.
+So if a linear map doesn't give you quite the effect you're looking for, and you'd like to bend it a bit, you could try a powerMap.
 
 ## segmentedMap
 
-Maybe I should have stopped right there, but if you go map crazy like me, you might want
-to start another map where the previous one left off.  For example, you may be defining a patrol
-route that a minotaur takes through a maze - it moves in a straight line,
-but occasionally changes direction.  For that we can use a segmented map.
+Maybe I should have stopped right there, but if you go map crazy like me, you might want to start another map where the previous one left off.  For example, you may be defining a patrol route that a minotaur takes through a maze - it moves in a straight line, but occasionally changes direction.  For that we can use a segmented map.
 # %%--- [javascript]
 # properties:
 #   run_on_load: true

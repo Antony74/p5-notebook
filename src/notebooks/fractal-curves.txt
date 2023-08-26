@@ -1,22 +1,12 @@
 # %% [markdown]
 # Fractal curves with segmentedMap
-When I wrote [in praise of the map function](./in-praise-of-the-map-function.html) I proposed
-a modest extension of the p5 map function called segmentedMap.  Now that was supposed to be
-the end of it, but while I was walking the dog it suddenly occurred to me that we can call
-it recursively in order to draw and do creative things with fractal curves such as the
-Koch Snowflake and the Hilbert Curve.
+When I wrote [in praise of the map function](./in-praise-of-the-map-function.html) I proposed a modest extension of the p5 map function called segmentedMap.  Now that was supposed to be the end of it, but while I was walking the dog it suddenly occurred to me that we can call it recursively in order to draw and do creative things with fractal curves such as the Koch Snowflake and the Hilbert Curve.
 
 ## Vectorising the map function
 
-Actually I was wrong - a variant of the (scalar) map function gives you an intresting and creative
-way of getting from point A to point B, but to draw these curves we sometimes need to go
-sideways.. which means we need to know which way sideways is... something we need both the
-x and y coordinate in order to determine.
+Actually I was wrong - a variant of the (scalar) map function gives you an intresting and creative way of getting from point A to point B, but to draw these curves we sometimes need to go sideways.. which means we need to know which way sideways is... something we need both the x and y coordinate in order to determine.
 
-So lets write a version of the map function that uses vectors, rather than a single (scalar)
-value for its target range.  This is probably a good thing anyway, as intermediate to
-advanced programmers usually find it more convienant and they have less they need to think
-about when coding with vectors.
+So lets write a version of the map function that uses vectors, rather than a single (scalar) value for its target range.  This is probably a good thing anyway, as intermediate to advanced programmers usually find it more convienant and they have less they need to think about when coding with vectors.
 
 # %%--- [javascript]
 # properties:
@@ -50,15 +40,18 @@ var p5WithCleanup = (sketch, text) => {
 # ---%%
 await import("../../p5/lib/p5.js");
 
-var createVectorMapFn = p => (n, start1, stop1, start2, stop2) => {
-    return p.createVector(
-        p.map(n, start1, stop1, start2.x, stop2.x),
-        p.map(n, start1, stop1, start2.y, stop2.y)
-    );
+var createVectorMapFn = p => {
+    var vectorMap = (n, start1, stop1, start2, stop2) => {
+        return p.createVector(
+            p.map(n, start1, stop1, start2.x, stop2.x),
+            p.map(n, start1, stop1, start2.y, stop2.y)
+        );
+    };
+
+    return vectorMap;
 };
 # %% [markdown]
-Nothing exciting there, we're just calling the map function twice, first to map the x-coordinate
-then to map the y-coordinate, and creating a new vector from the result.
+Nothing exciting there, we're just calling the map function twice, first to map the x-coordinate then to map the y-coordinate, and creating a new vector from the result.
 
 ## Example sketch: Moving a Circle
 
@@ -122,10 +115,7 @@ Exactly the same boring animation, but the code is slightly more elegant, maybe?
 
 ## A single iteration of the Koch Snowflake
 
-The algorithm for the [Koch Snowflake](https://en.wikipedia.org/wiki/Koch_snowflake)
-is to recursively mutate each line segment by replacing the middle third with the
-other two sides of an equilateral triangle.  I'd probably better draw (a non-recursive
-example) of that:
+The algorithm for the [Koch Snowflake](https://en.wikipedia.org/wiki/Koch_snowflake) is to recursively mutate each line segment by replacing the middle third with the other two sides of an equilateral triangle.  I'd probably better draw (a non-recursive example) of that:
 # %%--- [javascript]
 # properties:
 #   run_on_load: true

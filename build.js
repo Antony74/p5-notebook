@@ -5,6 +5,7 @@ const mustache = require('mustache');
 const prettier = require('prettier');
 
 const { copyLibs } = require('./copyLibs');
+const { parseNotebook } = require('./parseNotebook');
 
 copyLibs();
 
@@ -96,6 +97,31 @@ const build = async () => {
         path.join(__dirname, 'src/index.html'),
         await prettier.format(contents, { ...prettierOptions, parser: 'html' }),
     );
+
+    //
+    // Perform some sanity checks on each notebook
+    //
+    notebooks.forEach(async (notebook) => {
+        const filename = path.join(
+            __dirname,
+            'src',
+            'notebooks',
+            `${notebook.fileTitle}.txt`,
+        );
+
+        const text = await fsp.readFile(filename, { encoding: 'utf-8' });
+
+        const output = parseNotebook(text)
+            .map((section) => {
+                switch (section.type) {
+                    default:
+                        return section.text;
+                }
+            })
+            .join('');
+
+        fsp.writeFile(filename, output);
+    });
 };
 
 build();

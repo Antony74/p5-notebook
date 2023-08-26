@@ -126,6 +126,7 @@ const spellcheckMarkdown = (md) => {
                 case 'minotaur':
                 case 'sqrt':
                 case 'withinBounds':
+                case 'Vectorizing':
                     break; // special case
                 default:
                     console.warn(`Word ${word} not recognised`);

@@ -593,4 +593,4 @@ var segmentedMapExample2 = (p) => {
 p5WithCleanup(segmentedMapExample2, 'segmentedMapExample2');
 
 # %% [markdown]
-Thanks for reading. I hope you have fun with the map function!
+Thanks for reading. See you around on [r/processing](https://www.reddit.com/r/processing/), and I hope you have fun with the map function!

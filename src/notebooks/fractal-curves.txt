@@ -252,7 +252,7 @@ var createKochSnowflakemapFn = (p) => {
         var d = vectorMap(4, 0, 6, start2, stop2);
 
         var bdNormal = d.copy().sub(b).rotate(p.HALF_PI);
-        bdNormal.setMag(bdNormal.mag() / 2);
+        bdNormal.setMag(heightOfEquilateralTriangle(bdNormal.mag()));
 
         c.add(bdNormal);
 
@@ -265,4 +265,72 @@ var createKochSnowflakemapFn = (p) => {
             [nextMap, nextMap, nextMap, nextMap],
         );
     };
+
+    return kochSnowflakeMap;
 };
+
+# %% [markdown]
+# Quick sketch to look at that with
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var quickSketch = (p) => {
+    var kochSnowflakeMap = createKochSnowflakemapFn(p);
+
+    p.setup = () => {
+        p.createCanvas(640, 480);
+        p.background(244);
+    };
+
+    var kochSnowflakeTop = (value, start1, stop1, depth) => {
+        var range1 = [];
+        var range2 = [];
+
+        var value03 = p.map(value, start1, stop1, 0, 3);
+
+        var nextMap = kochSnowflakeMap(depth - 1);
+
+        var radius = 220;
+        var centre = p.createVector(p.width / 2, p.height / 2);
+
+        for (var n = 0; n < 4; ++n) {
+            range1.push(n);
+
+            var angle = p.map(n, 0, 3, 0, p.TWO_PI) + p.HALF_PI;
+
+            var vec = p.createVector(
+                radius * Math.cos(angle),
+                radius * Math.sin(angle),
+            );
+
+            range2.push(vec.add(centre));
+        }
+
+        return segmentedMap(value03, range1, range2.reverse(), [
+            nextMap,
+            nextMap,
+            nextMap,
+        ]);
+    };
+
+    p.draw = () => {
+        p.strokeWeight(2);
+        p.noFill();
+
+        p.beginShape();
+
+        var points = 1000;
+        for (var n = 0; n < points; ++n) {
+            var point = kochSnowflakeTop(n, 0, points, 3);
+
+            p.vertex(point.x, point.y);
+        }
+
+        p.endShape();
+
+        p.noLoop();
+    };
+};
+p5WithCleanup(quickSketch, 'quickSketch');

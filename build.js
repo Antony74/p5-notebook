@@ -7,8 +7,6 @@ const prettier = require('prettier');
 const { copyLibs } = require('./copyLibs');
 const { parseNotebook, spellcheckMarkdown } = require('./parseNotebook');
 
-copyLibs();
-
 const notebooks = [
     {
         title: 'In praise of the map function',
@@ -33,6 +31,58 @@ const build = async () => {
     );
 
     const prettierOptions = JSON.parse(packageJsonText).prettier;
+
+    //
+    // Perform some sanity checks on each notebook
+    //
+    await Promise.all(
+        notebooks.map(async (notebook) => {
+            const filename = path.join(
+                __dirname,
+                'src',
+                'notebooks',
+                `${notebook.fileTitle}.txt`,
+            );
+
+            const text = await fsp.readFile(filename, { encoding: 'utf-8' });
+
+            const textArray = await Promise.all(
+                parseNotebook(text).map(async (section) => {
+                    //
+                    // Spellcheck markdown sections of notebook
+                    //
+
+                    if (section.type === 'markdown') {
+                        spellcheckMarkdown(section.text);
+                    }
+
+                    //
+                    // Run prettier on JavaScript and Markdown sections of the notebook
+                    //
+
+                    switch (section.type) {
+                        case 'babel':
+                        case 'markdown':
+                            return await prettier.format(section.text, {
+                                ...prettierOptions,
+                                parser: section.type,
+                            });
+                        default:
+                            return section.text;
+                    }
+                }),
+            );
+
+            await fsp.writeFile(filename, textArray.join('\n'));
+        }),
+    );
+
+    //
+    // copyLibs
+    //
+
+    copyLibs();
+
 
     //
     // Write (from template) a html page for each notebook
@@ -97,49 +147,6 @@ const build = async () => {
         path.join(__dirname, 'src/index.html'),
         await prettier.format(contents, { ...prettierOptions, parser: 'html' }),
     );
-
-    //
-    // Perform some sanity checks on each notebook
-    //
-    notebooks.forEach(async (notebook) => {
-        const filename = path.join(
-            __dirname,
-            'src',
-            'notebooks',
-            `${notebook.fileTitle}.txt`,
-        );
-
-        const text = await fsp.readFile(filename, { encoding: 'utf-8' });
-
-        const textArray = await Promise.all(
-            parseNotebook(text).map(async (section) => {
-                //
-                // Spellcheck markdown sections of notebook
-                //
-
-                if (section.type === 'markdown') {
-                    spellcheckMarkdown(section.text);
-                }
-
-                //
-                // Run prettier on JavaScript and Markdown sections of the notebook
-                //
-
-                switch (section.type) {
-                    case 'babel':
-                    case 'markdown':
-                        return await prettier.format(section.text, {
-                            ...prettierOptions,
-                            parser: section.type,
-                        });
-                    default:
-                        return section.text;
-                }
-            }),
-        );
-
-        fsp.writeFile(filename, textArray.join('\n'));
-    });
 };
 
 build();

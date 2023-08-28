@@ -335,3 +335,71 @@ var quickSketch = (p) => {
     };
 };
 p5WithCleanup(quickSketch, 'quickSketch');
+
+# %% [markdown]
+# Now start playing with the Hilbert Curve
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var hilbertPlay = (p) => {
+    var vectorMap = createVectorMapFn(p);
+
+    p.setup = () => {
+        p.createCanvas(640, 480);
+        p.background(244);
+    };
+
+    var hilbertCurvePoints = (centre, radius, angle) => {
+        return [1.5, 2.5, 3.5, 4.5].map((theta) => {
+            const vec = p.createVector(
+                radius * Math.cos(theta),
+                radius * Math.sin(theta),
+            );
+            return vec.add(centre);
+        });
+    };
+
+    var hilbertMap = (depth, angle) => (n, a, d, start2, stop2) => {
+        var normal = stop2.copy().sub(start2).rotate(angle);
+        const b = p.map(2, 1, 4, a, d);
+        const c = p.map(3, 1, 4, a, d);
+        var bVec = start2.copy().add(normal);
+        var cVec = stop2.copy().add(normal);
+
+        var nextMap = depth <= 1 ? vectorMap : hilbertMap(depth - 1);
+
+        var hilberMaps = [];
+
+        return segmentedMap(
+            n,
+            [a, b, c, d],
+            [start2, bVec, cVec, stop2],
+            [nextMap, nextMap, nextMap, nextMap],
+        );
+    };
+
+    p.draw = () => {
+        p.strokeWeight(2);
+        p.noFill();
+
+        p.beginShape();
+
+        var startMap = hilbertMap(0, p.HALF_PI);
+        var startPoint = p.createVector(100, 100);
+        var stopPoint = p.createVector(200, 100);
+
+        var points = 1000;
+        for (var n = 0; n < points; ++n) {
+            var point = startMap(n, 0, points, startPoint, stopPoint);
+
+            p.vertex(point.x, point.y);
+        }
+
+        p.endShape();
+
+        p.noLoop();
+    };
+};
+p5WithCleanup(hilbertPlay, 'hilbertPlay');

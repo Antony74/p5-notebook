@@ -352,8 +352,9 @@ var hilbertPlay = (p) => {
     };
 
     var hilbertCurvePoints = (centre, radius, angle) => {
-        return [1.5, 2.5, 3.5, 4.5].map((theta) => {
-            const vec = p.createVector(
+        return [1.5, 2.5, 3.5, 4.5].map((corner) => {
+            var theta = (p.HALF_PI * corner) + angle;
+            var vec = p.createVector(
                 radius * Math.cos(theta),
                 radius * Math.sin(theta),
             );
@@ -361,38 +362,30 @@ var hilbertPlay = (p) => {
         });
     };
 
-    var hilbertMap = (depth, angle) => (n, a, d, start2, stop2) => {
-        var normal = stop2.copy().sub(start2).rotate(angle);
-        const b = p.map(2, 1, 4, a, d);
-        const c = p.map(3, 1, 4, a, d);
-        var bVec = start2.copy().add(normal);
-        var cVec = stop2.copy().add(normal);
-
-        var nextMap = depth <= 1 ? vectorMap : hilbertMap(depth - 1);
-
-        var hilberMaps = [];
-
-        return segmentedMap(
-            n,
-            [a, b, c, d],
-            [start2, bVec, cVec, stop2],
-            [nextMap, nextMap, nextMap, nextMap],
-        );
+    var logPoint = (vec) => {
+        p.ellipse(vec.x, vec.y, 10);
+        console.log(`x: ${vec.x}, y: ${vec.y}`)
     };
 
     p.draw = () => {
         p.strokeWeight(2);
         p.noFill();
 
-        p.beginShape();
-
-        var startMap = hilbertMap(0, p.HALF_PI);
-        var startPoint = p.createVector(100, 100);
-        var stopPoint = p.createVector(200, 100);
+        var centre = p.createVector(p.width / 2, p.height / 2);
+        var curvePoints = hilbertCurvePoints(centre, 100, p.PI);
 
         var points = 1000;
+
+        var ranges = Array.from({ length: curvePoints.length }).map(
+            (v, index) => p.map(index, 0, curvePoints.length, 0, points),
+        );
+
+        var maps = Array.from({ length: curvePoints.length }).fill(vectorMap);
+
+        p.beginShape();
+
         for (var n = 0; n < points; ++n) {
-            var point = startMap(n, 0, points, startPoint, stopPoint);
+            var point = segmentedMap(n, ranges, curvePoints, maps);
 
             p.vertex(point.x, point.y);
         }

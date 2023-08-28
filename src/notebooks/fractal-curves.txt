@@ -351,20 +351,51 @@ var hilbertPlay = (p) => {
         p.background(244);
     };
 
-    var hilbertCurvePoints = (centre, radius, angle) => {
-        return [1.5, 2.5, 3.5, 4.5].map((corner) => {
-            var theta = (p.HALF_PI * corner) + angle;
+    var hilbertCurvePoints = (centre, radius, angle, direction, depth) => {
+        var result = [1.5, 2.5, 3.5, 4.5].map((corner) => {
+            var theta = Math.sign(direction) * (p.HALF_PI * corner + angle);
             var vec = p.createVector(
                 radius * Math.cos(theta),
                 radius * Math.sin(theta),
             );
             return vec.add(centre);
         });
+
+        if (depth <= 1) {
+            return result;
+        }
+
+        return result.reduce((acc, point, index) => {
+            var newAngle = angle;
+            var newDirection = direction;
+
+            switch (index) {
+                case 0:
+                    newAngle += p.HALF_PI * direction;
+                    newDirection *= -1;
+                    break;
+                case 3:
+                    newAngle -= p.HALF_PI * direction;
+                    newDirection *= -1;
+                    break;
+            }
+
+            return [
+                ...acc,
+                ...hilbertCurvePoints(
+                    point,
+                    radius / 2,
+                    newAngle,
+                    newDirection,
+                    depth - 1,
+                ),
+            ];
+        }, []);
     };
 
     var logPoint = (vec) => {
         p.ellipse(vec.x, vec.y, 10);
-        console.log(`x: ${vec.x}, y: ${vec.y}`)
+        console.log(`x: ${vec.x}, y: ${vec.y}`);
     };
 
     p.draw = () => {
@@ -372,9 +403,9 @@ var hilbertPlay = (p) => {
         p.noFill();
 
         var centre = p.createVector(p.width / 2, p.height / 2);
-        var curvePoints = hilbertCurvePoints(centre, 100, p.PI);
+        var curvePoints = hilbertCurvePoints(centre, 100, 0, 1, 6);
 
-        var points = 1000;
+        var points = 30000;
 
         var ranges = Array.from({ length: curvePoints.length }).map(
             (v, index) => p.map(index, 0, curvePoints.length, 0, points),

@@ -343,13 +343,8 @@ p5WithCleanup(quickSketch, 'quickSketch');
 # properties:
 #   run_on_load: true
 # ---%%
-var hilbertPlay = (p) => {
+var createHilbertCurveMap = (p) => {
     var vectorMap = createVectorMapFn(p);
-
-    p.setup = () => {
-        p.createCanvas(640, 480);
-        p.background(244);
-    };
 
     var hilbertCurvePoints = (centre, radius, angle, direction, depth) => {
         var result = [1.5, 2.5, 3.5, 4.5].map((corner) => {
@@ -393,30 +388,53 @@ var hilbertPlay = (p) => {
         }, []);
     };
 
-    var logPoint = (vec) => {
-        p.ellipse(vec.x, vec.y, 10);
-        console.log(`x: ${vec.x}, y: ${vec.y}`);
+    var hilbertCurveMap = (depth) => (n, start1, stop1, start2, stop2) => {
+        var centreVec1 = stop2.copy().sub(start2);
+        centreVec1.setMag(centreVec1.mag() / 2);
+        var centreVec2 = centreVec1.copy().rotate(p.HALF_PI);
+        var centre = start2.copy().add(centreVec1).add(centreVec2);
+
+        var curvePoints = hilbertCurvePoints(
+            centre,
+            centreVec1.mag(),
+            0,
+            1,
+            depth,
+        );
+
+        var ranges = Array.from({ length: curvePoints.length }).map(
+            (v, index) => p.map(index, 0, curvePoints.length, start1, stop1),
+        );
+
+        var maps = Array.from({ length: curvePoints.length }).fill(vectorMap);
+
+        return segmentedMap(n, ranges, curvePoints, maps);
+    };
+
+    return hilbertCurveMap;
+};
+
+var displayFractalCurveMap = (createFractalCurveMap) => (p) => {
+    var fracalCurveMap = createFractalCurveMap(p);
+
+    p.setup = () => {
+        p.createCanvas(480, 480);
+        p.background(244);
     };
 
     p.draw = () => {
         p.strokeWeight(2);
         p.noFill();
 
-        var centre = p.createVector(p.width / 2, p.height / 2);
-        var curvePoints = hilbertCurvePoints(centre, 100, 0, 1, 6);
-
-        var points = 30000;
-
-        var ranges = Array.from({ length: curvePoints.length }).map(
-            (v, index) => p.map(index, 0, curvePoints.length, 0, points),
-        );
-
-        var maps = Array.from({ length: curvePoints.length }).fill(vectorMap);
+        var points = 10000;
+        var currentMap = fracalCurveMap(6);
+        var start = p.createVector(0, 100);
+        var stop = p.createVector(p.width, 100);
 
         p.beginShape();
 
         for (var n = 0; n < points; ++n) {
-            var point = segmentedMap(n, ranges, curvePoints, maps);
+            var point = currentMap(n, 0, points, start, stop);
 
             p.vertex(point.x, point.y);
         }
@@ -426,4 +444,10 @@ var hilbertPlay = (p) => {
         p.noLoop();
     };
 };
-p5WithCleanup(hilbertPlay, 'hilbertPlay');
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var hilbertCurveSketch = displayFractalCurveMap(createHilbertCurveMap);
+p5WithCleanup(hilbertCurveSketch, 'hilbertCurveSketch');

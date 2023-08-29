@@ -413,32 +413,31 @@ var createHilbertCurveMap = (p) => {
 
 var displayFractalCurveMap = (createFractalCurveMap) => (p) => {
     var currentMap;
+    var animationLength = Math.pow(2, 9);
+    var backgroundColor = 244;
 
     p.setup = () => {
         p.createCanvas(480, 480);
-        p.background(244);
+        p.background(backgroundColor);
 
         var { hilbertCurveForDisplay } = createHilbertCurveMap(p);
         currentMap = hilbertCurveForDisplay(6);
     };
 
     p.draw = () => {
+        p.noStroke();
+        p.fill(backgroundColor, 8);
+        p.rect(0, 0, p.width, p.height);
+        p.stroke(0);
         p.strokeWeight(2);
-        p.noFill();
 
-        var points = Math.pow(2, 12);
-
-        p.beginShape();
-
-        for (var n = 0; n < points; ++n) {
-            var point = currentMap(n, 0, points);
-
-            p.vertex(point.x, point.y);
+        var frame = p.frameCount % animationLength;
+        var pointsPerFrame = 80;
+        for (var n = 0; n < pointsPerFrame; ++n) {
+            var pos = p.map(n, 0, pointsPerFrame, frame - 1, frame + 1);
+            var point = currentMap(pos, 0, animationLength);
+            p.point(point.x, point.y);
         }
-
-        p.endShape();
-
-        p.noLoop();
     };
 };
 

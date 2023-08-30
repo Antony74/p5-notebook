@@ -425,19 +425,23 @@ var displayFractalCurveMap = (createFractalCurveMap) => (p) => {
     };
 
     p.draw = () => {
-        p.noStroke();
-        p.fill(backgroundColor, 8);
-        p.rect(0, 0, p.width, p.height);
-        p.stroke(0);
+        var frame = p.frameCount % animationLength;
+
+        if (frame === 0) {
+            p.background(backgroundColor);
+        }
+
         p.strokeWeight(2);
 
-        var frame = p.frameCount % animationLength;
-        var pointsPerFrame = 80;
+        var pointsPerFrame = 16;
+
+        p.beginShape();
         for (var n = 0; n < pointsPerFrame; ++n) {
             var pos = p.map(n, 0, pointsPerFrame, frame - 1, frame + 1);
             var point = currentMap(pos, 0, animationLength);
-            p.point(point.x, point.y);
+            p.vertex(point.x, point.y);
         }
+        p.endShape();
     };
 };
 

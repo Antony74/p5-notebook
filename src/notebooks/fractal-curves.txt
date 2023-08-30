@@ -343,7 +343,7 @@ p5WithCleanup(quickSketch, 'quickSketch');
 # properties:
 #   run_on_load: true
 # ---%%
-var createHilbertCurveMap = (p) => {
+var createHilbertCurveFunctions = (p) => {
     var vectorMap = createVectorMapFn(p);
 
     var hilbertCurvePoints = (centre, radius, angle, direction, depth) => {
@@ -388,7 +388,7 @@ var createHilbertCurveMap = (p) => {
         }, []);
     };
 
-    var hilbertCurveForDisplay = (depth) => {
+    var hilbertCurveForDisplayUncached = (depth) => {
         var centre = p.createVector(0.5 * p.width, 0.5 * p.height);
         var radius = Math.min(0.35 * p.width, 0.35 * p.height);
 
@@ -408,20 +408,34 @@ var createHilbertCurveMap = (p) => {
         return hilbertCurveMap;
     };
 
-    return { hilbertCurveForDisplay, hilbertCurvePoints, vectorMap };
+    return { hilbertCurveForDisplayUncached, hilbertCurvePoints, vectorMap };
+};
+
+var createHilbertCurveForDisplay = (p) => {
+    var { hilbertCurveForDisplayUncached } = createHilbertCurveFunctions(p);
+    var cache = {};
+
+    var hilbertCurveForDisplay = (depth) => {
+        var returnValue = cache[depth];
+
+        if (!returnValue) {
+            var returnValue = hilbertCurveForDisplayUncached(depth);
+            cache[depth] = returnValue;
+        }
+        return returnValue;
+    };
+
+    return hilbertCurveForDisplay;
 };
 
 var displayFractalCurveMap = (createFractalCurveMap) => (p) => {
-    var currentMap;
+    var fractalCurveMap = createFractalCurveMap(p);
     var animationLength = Math.pow(2, 9);
     var backgroundColor = 244;
 
     p.setup = () => {
         p.createCanvas(480, 480);
         p.background(backgroundColor);
-
-        var { hilbertCurveForDisplay } = createHilbertCurveMap(p);
-        currentMap = hilbertCurveForDisplay(6);
     };
 
     p.draw = () => {
@@ -432,6 +446,7 @@ var displayFractalCurveMap = (createFractalCurveMap) => (p) => {
         }
 
         p.strokeWeight(2);
+        var currentMap = fractalCurveMap(6);
 
         var pointsPerFrame = 16;
 
@@ -449,5 +464,5 @@ var displayFractalCurveMap = (createFractalCurveMap) => (p) => {
 # properties:
 #   run_on_load: true
 # ---%%
-var hilbertCurveSketch = displayFractalCurveMap(createHilbertCurveMap);
+var hilbertCurveSketch = displayFractalCurveMap(createHilbertCurveForDisplay);
 p5WithCleanup(hilbertCurveSketch, 'hilbertCurveSketch');

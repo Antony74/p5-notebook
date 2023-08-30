@@ -129,6 +129,8 @@ const spellcheckMarkdown = (md) => {
                 case 'withinBounds':
                 case 'Vectorizing':
                 case 'kochSnowflakeMap':
+                case 'tac':
+                case 'explainlikeimfive':
                     break; // special case
                 default:
                     console.warn(`Word ${word} not recognised`);

@@ -71,14 +71,12 @@ There's a 'play' button below and to the left of the source code. Press to run a
 
 ## Common factors
 
-Let's also look at a quick example where the pixel count and the increment amount do have a common factor.  Now not all the pixels are visited.
+Let's also look at a quick example where the pixel count and the increment amount do have a common factor. Now not all the pixels are visited.
 
 # %%--- [javascript]
 # properties:
 #   run_on_load: true
 # ---%%
-await import('../../p5/lib/p5.js');
-
 var commonFactor = (p) => {
     var index = 0;
     var increment = 4;

@@ -56,7 +56,7 @@ var createVectorMapFn = (p) => {
         );
     };
 
-    return vectorMap;
+    return { vectorMap };
 };
 
 # %% [markdown]
@@ -102,7 +102,7 @@ Here's what it looks like if we use vectorMap instead:
 # ---%%
 var animatedCircleVectorised = (p) => {
     var animationLength = 200;
-    var vectorMap = createVectorMapFn(p);
+    var { vectorMap } = createVectorMapFn(p);
 
     p.setup = () => {
         p.createCanvas(300, 300);
@@ -139,7 +139,7 @@ var heightOfEquilateralTriangle = (sideLength) =>
 
 var singleKochSnowflakeStep = (p) => {
     var animationLength = 200;
-    var vectorMap = createVectorMapFn(p);
+    var { vectorMap } = createVectorMapFn(p);
 
     p.setup = () => {
         p.createCanvas(300, 300);
@@ -244,7 +244,7 @@ This is the same code I used in [in praise of the map function](./in-praise-of-t
 #   run_on_load: true
 # ---%%
 var createKochSnowflakemapFn = (p) => {
-    var vectorMap = createVectorMapFn(p);
+    var { vectorMap } = createVectorMapFn(p);
 
     var kochSnowflakeMap = (depth) => (n, start1, stop1, start2, stop2) => {
         var ratio = map(n, start1, stop1, 0, 1);
@@ -268,26 +268,24 @@ var createKochSnowflakemapFn = (p) => {
         );
     };
 
-    return kochSnowflakeMap;
+    return { kochSnowflakeMap, vectorMap };
 };
 
 # %% [markdown]
-# Quick sketch to look at that with
+As promised, at each iteration we replace each line segment with four line segments, and this is implemented by calling segmentedMap recursively.
+
+It's not difficult to draw the Koch Snowflake, but the nice thing about having it in a map is it separates the logic of its shape from whatever we might want to do with it. The same is true of any other well defined application programming interface (API) of course. We don't have to fully understand a piece of code in order to take it away and do cool things with it. (Large systems would never get maintained if we had to understand more than the area of the code where we're currently open, as they may be hundreds of thousands or millions of lines long).
+
+There's a little bit more to do, because we need to define the initial three sides of the Koch Snowflake, and arrange them nicely within the bounds of a sketch.
 
 # %%--- [javascript]
 # properties:
 #   run_on_load: true
 # ---%%
-var quickSketch = (p) => {
-    var kochSnowflakeMap = createKochSnowflakemapFn(p);
-    var vectorMap = createVectorMapFn(p);
+var createKochSnowflakeForDisplay = (p) => {
+    var { kochSnowflakeMap, vectorMap } = createKochSnowflakemapFn(p);
 
-    p.setup = () => {
-        p.createCanvas(640, 480);
-        p.background(244);
-    };
-
-    var kochSnowflakeTop = (value, start1, stop1, depth) => {
+    return (depth) => (value, start1, stop1) => {
         var range1 = [];
         var range2 = [];
 
@@ -317,26 +315,100 @@ var quickSketch = (p) => {
             nextMap,
         ]);
     };
+};
+
+# %% [markdown]
+# A sketch to display fractal curves
+
+Now let's write a sketch to display fractal curves.
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var displayFractalCurveMap = (createFractalCurveMap) => (p) => {
+    var fractalCurveMap = createFractalCurveMap(p);
+    var depths = [1, 2, 3, 4, 5, 6, 7];
+
+    var pause = 96;
+    var short = 128;
+    var medium = 256;
+    var long = 512;
+
+    var animationSections = [
+        0,
+        short,
+        pause,
+        medium,
+        pause,
+        medium,
+        pause,
+        long,
+        pause,
+        long,
+        pause,
+        long,
+        pause,
+    ].reduce((acc, value) => {
+        var add = acc.length ? acc[acc.length - 1] : 0;
+        return [...acc, value + add];
+    }, []);
+
+    var animationLength = animationSections[animationSections.length - 1];
+    var backgroundColor = 244;
+
+    p.setup = () => {
+        p.createCanvas(480, 480);
+        p.background(backgroundColor);
+    };
 
     p.draw = () => {
+        var frame = p.frameCount % animationLength;
+        var index = animationSections.findIndex((v) => v > frame) - 1;
+
+        if (index === -1) {
+            throw new Error(
+                `Could not find index for frame ${frame} in ${animationSections}`,
+            );
+        }
+
+        if (index % 2) {
+            return; // Odd numbered animation sections are for pauses
+        }
+
+        var currentMap = fractalCurveMap(depths[index / 2]);
+        var sectionStart = animationSections[index];
+        var sectionLength = animationSections[index + 1] - sectionStart;
+        frame -= sectionStart;
+
+        if (frame === 0) {
+            p.background(backgroundColor);
+        }
+
         p.strokeWeight(2);
         p.noFill();
 
+        var pointsPerFrame = 16;
+
         p.beginShape();
-
-        var points = 10000;
-        for (var n = 0; n < points; ++n) {
-            var point = kochSnowflakeTop(n, 0, points, 3);
-
+        for (var n = 0; n < pointsPerFrame; ++n) {
+            var pos = p.map(n, 0, pointsPerFrame, frame - 1, frame + 1);
+            var point = currentMap(pos, 0, sectionLength);
             p.vertex(point.x, point.y);
         }
-
         p.endShape();
-
-        p.noLoop();
     };
 };
-p5WithCleanup(quickSketch, 'quickSketch');
+
+# %% [markdown]
+# The Koch Snowflake
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var kockSnowflakeSketch = displayFractalCurveMap(createKochSnowflakeForDisplay);
+p5WithCleanup(kockSnowflakeSketch, 'kockSnowflakeSketch');
 
 # %% [markdown]
 # Now start playing with the Hilbert Curve
@@ -346,7 +418,7 @@ p5WithCleanup(quickSketch, 'quickSketch');
 #   run_on_load: true
 # ---%%
 var createHilbertCurveFunctions = (p) => {
-    var vectorMap = createVectorMapFn(p);
+    var { vectorMap } = createVectorMapFn(p);
 
     var hilbertCurvePoints = (centre, radius, angle, direction, depth) => {
         var result = [1.5, 2.5, 3.5, 4.5].map((corner) => {
@@ -428,80 +500,6 @@ var createHilbertCurveForDisplay = (p) => {
     };
 
     return hilbertCurveForDisplay;
-};
-
-var displayFractalCurveMap = (createFractalCurveMap) => (p) => {
-    var fractalCurveMap = createFractalCurveMap(p);
-    var depths = [1, 2, 3, 4, 5, 6, 7];
-
-    var pause = 96;
-    var short = 128;
-    var medium = 256;
-    var long = 512;
-
-    var animationSections = [
-        0,
-        short,
-        pause,
-        medium,
-        pause,
-        medium,
-        pause,
-        long,
-        pause,
-        long,
-        pause,
-        long,
-        pause,
-    ].reduce((acc, value) => {
-        var add = acc.length ? acc[acc.length - 1] : 0;
-        return [...acc, value + add];
-    }, []);
-
-    var animationLength = animationSections[animationSections.length - 1];
-    var backgroundColor = 244;
-
-    p.setup = () => {
-        p.createCanvas(480, 480);
-        p.background(backgroundColor);
-    };
-
-    p.draw = () => {
-        var frame = p.frameCount % animationLength;
-        var index = animationSections.findIndex((v) => v > frame) - 1;
-
-        if (index === -1) {
-            throw new Error(
-                `Could not find index for frame ${frame} in ${animationSections}`,
-            );
-        }
-
-        if (index % 2) {
-            return; // Odd numbered animation sections are for pauses
-        }
-
-        var currentMap = fractalCurveMap(depths[index / 2]);
-        var sectionStart = animationSections[index];
-        var sectionLength = animationSections[index + 1] - sectionStart;
-        frame -= sectionStart;
-
-        if (frame === 0) {
-            p.background(backgroundColor);
-        }
-
-        p.strokeWeight(2);
-        p.noFill();
-
-        var pointsPerFrame = 16;
-
-        p.beginShape();
-        for (var n = 0; n < pointsPerFrame; ++n) {
-            var pos = p.map(n, 0, pointsPerFrame, frame - 1, frame + 1);
-            var point = currentMap(pos, 0, sectionLength);
-            p.vertex(point.x, point.y);
-        }
-        p.endShape();
-    };
 };
 
 # %%--- [javascript]

@@ -256,7 +256,7 @@ var createKochSnowflakemapFn = (p) => {
         var bdNormal = d.copy().sub(b).rotate(p.HALF_PI);
         bdNormal.setMag(heightOfEquilateralTriangle(bdNormal.mag()));
 
-        c.add(bdNormal);
+        c.sub(bdNormal);
 
         var nextMap = depth <= 1 ? vectorMap : kochSnowflakeMap(depth - 1);
 
@@ -299,7 +299,7 @@ var createKochSnowflakeForDisplay = (p) => {
         for (var n = 0; n < 4; ++n) {
             range1.push(n);
 
-            var angle = p.map(n, 0, 3, 0, p.TWO_PI) + p.HALF_PI;
+            var angle = p.map(n, 0, 3, 0, p.TWO_PI) - p.HALF_PI;
 
             var vec = p.createVector(
                 radius * Math.cos(angle),
@@ -309,7 +309,7 @@ var createKochSnowflakeForDisplay = (p) => {
             range2.push(vec.add(centre));
         }
 
-        return segmentedMap(value03, range1, range2.reverse(), [
+        return segmentedMap(value03, range1, range2, [
             nextMap,
             nextMap,
             nextMap,
@@ -411,7 +411,9 @@ var kochSnowflakeSketch = displayFractalCurveMap(createKochSnowflakeForDisplay);
 p5WithCleanup(kochSnowflakeSketch, 'kochSnowflakeSketch');
 
 # %% [markdown]
-# Now start playing with the Hilbert Curve
+## The Hilbert Curve
+
+I promised the Hilbert space-filling curve as a second example.
 
 # %%--- [javascript]
 # properties:
@@ -508,3 +510,12 @@ var createHilbertCurveForDisplay = (p) => {
 # ---%%
 var hilbertCurveSketch = displayFractalCurveMap(createHilbertCurveForDisplay);
 p5WithCleanup(hilbertCurveSketch, 'hilbertCurveSketch');
+
+# %% [markdown]
+## Conclusions
+Sometimes I think I'm profoundly uncreative, and the real creative coding
+
+## Bonus variations
+Having said that, here's a few curious variations I stumbled upon while working on this.
+
+###

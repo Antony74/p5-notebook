@@ -432,7 +432,33 @@ var createHilbertCurveForDisplay = (p) => {
 
 var displayFractalCurveMap = (createFractalCurveMap) => (p) => {
     var fractalCurveMap = createFractalCurveMap(p);
-    var animationLength = Math.pow(2, 9);
+    var depths = [1, 2, 3, 4, 5, 6, 7];
+
+    var pause = 96;
+    var short = 128;
+    var medium = 256;
+    var long = 512;
+
+    var animationSections = [
+        0,
+        short,
+        pause,
+        medium,
+        pause,
+        medium,
+        pause,
+        long,
+        pause,
+        long,
+        pause,
+        long,
+        pause,
+    ].reduce((acc, value) => {
+        var add = acc.length ? acc[acc.length - 1] : 0;
+        return [...acc, value + add];
+    }, []);
+
+    var animationLength = animationSections[animationSections.length - 1];
     var backgroundColor = 244;
 
     p.setup = () => {
@@ -442,20 +468,36 @@ var displayFractalCurveMap = (createFractalCurveMap) => (p) => {
 
     p.draw = () => {
         var frame = p.frameCount % animationLength;
+        var index = animationSections.findIndex((v) => v > frame) - 1;
+
+        if (index === -1) {
+            throw new Error(
+                `Could not find index for frame ${frame} in ${animationSections}`,
+            );
+        }
+
+        if (index % 2) {
+            return; // Odd numbered animation sections are for pauses
+        }
+
+        var currentMap = fractalCurveMap(depths[index / 2]);
+        var sectionStart = animationSections[index];
+        var sectionLength = animationSections[index + 1] - sectionStart;
+        frame -= sectionStart;
 
         if (frame === 0) {
             p.background(backgroundColor);
         }
 
         p.strokeWeight(2);
-        var currentMap = fractalCurveMap(6);
+        p.noFill();
 
         var pointsPerFrame = 16;
 
         p.beginShape();
         for (var n = 0; n < pointsPerFrame; ++n) {
             var pos = p.map(n, 0, pointsPerFrame, frame - 1, frame + 1);
-            var point = currentMap(pos, 0, animationLength);
+            var point = currentMap(pos, 0, sectionLength);
             p.vertex(point.x, point.y);
         }
         p.endShape();

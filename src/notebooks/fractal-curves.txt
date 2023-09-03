@@ -413,7 +413,114 @@ p5WithCleanup(kochSnowflakeSketch, 'kochSnowflakeSketch');
 # %% [markdown]
 ## The Hilbert Curve
 
-I promised the Hilbert space-filling curve as a second example.
+I promised the Hilbert space-filling curve as a second example of a fractal curve. I was hoping it would be more of the same, but it's a bit different to construct.
+
+We start with an inverted horseshoe (cup, or u-shape), consisting of four points, which we're going to join in a clockwise direction.
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var hilbertCurveDepthOne = (p) => {
+    p.setup = () => {
+        p.createCanvas(300, 300);
+        p.background(200);
+        p.strokeWeight(2);
+        p.noFill();
+
+        p.beginShape();
+        p.vertex(76, 224);
+        p.vertex(76, 76);
+        p.vertex(224, 76);
+        p.vertex(224, 224);
+        p.endShape();
+    };
+};
+p5WithCleanup(hilbertCurveDepthOne, 'hilbertCurveDepthOne');
+
+# %% [markdown]
+In order to iterate, we replace each of the four points with another horseshoe.  Also we turn the two lower horseshoes to face inwards, like this:
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var hilbertCurveDepthOneAndAHalf = (p) => {
+    p.setup = () => {
+        p.createCanvas(300, 300);
+        p.background(200);
+        p.strokeWeight(2);
+        p.noFill();
+
+        p.beginShape();
+        p.vertex(39, 261);
+        p.vertex(113, 261);
+        p.vertex(113, 187);
+        p.vertex(39, 187);
+        p.endShape();
+
+        p.beginShape();
+        p.vertex(39, 113);
+        p.vertex(39, 39);
+        p.vertex(113, 39);
+        p.vertex(113, 113);
+        p.endShape();
+
+        p.beginShape();
+        p.vertex(187, 113);
+        p.vertex(187, 39);
+        p.vertex(261, 39);
+        p.vertex(261, 113);
+        p.endShape();
+
+        p.beginShape();
+        p.vertex(261, 187);
+        p.vertex(187, 187);
+        p.vertex(187, 261);
+        p.vertex(261, 261);
+        p.endShape();
+    };
+};
+p5WithCleanup(hilbertCurveDepthOneAndAHalf, 'hilbertCurveDepthOneAndAHalf');
+
+# %% [markdown]
+Finally we join the horseshoes in the direction indicated by the original horseshoe.  
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var hilbertCurveDepthTwo = (p) => {
+    p.setup = () => {
+        p.createCanvas(300, 300);
+        p.background(200);
+        p.strokeWeight(2);
+        p.noFill();
+
+        p.beginShape();
+        p.vertex(39, 261);
+        p.vertex(113, 261);
+        p.vertex(113, 187);
+        p.vertex(39, 187);
+        p.vertex(39, 113);
+        p.vertex(39, 39);
+        p.vertex(113, 39);
+        p.vertex(113, 113);
+        p.vertex(187, 113);
+        p.vertex(187, 39);
+        p.vertex(261, 39);
+        p.vertex(261, 113);
+        p.vertex(261, 187);
+        p.vertex(187, 187);
+        p.vertex(187, 261);
+        p.vertex(261, 261);
+        p.endShape();
+    };
+};
+p5WithCleanup(hilbertCurveDepthTwo, 'hilbertCurveDepthTwo');
+
+# %% [markdown]
+It's this final step which interferes with the plan to construct segmented maps recursively.  But we can still construct arrays of points recursively, and segmentedMap is still a great way to join these points.  So let's define some functions to do that.
 
 # %%--- [javascript]
 # properties:
@@ -495,7 +602,7 @@ var createHilbertCurveForDisplay = (p) => {
         var returnValue = cache[depth];
 
         if (!returnValue) {
-            var returnValue = hilbertCurveForDisplayUncached(depth);
+            returnValue = hilbertCurveForDisplayUncached(depth);
             cache[depth] = returnValue;
         }
         return returnValue;
@@ -512,10 +619,12 @@ var hilbertCurveSketch = displayFractalCurveMap(createHilbertCurveForDisplay);
 p5WithCleanup(hilbertCurveSketch, 'hilbertCurveSketch');
 
 # %% [markdown]
-## Conclusions
+## Conclusions - creative coding with fractal curves
+
 Sometimes I think I'm profoundly uncreative, and the real creative coding
 
 ## Bonus variations
+
 Having said that, here's a few curious variations I stumbled upon while working on this.
 
 ###

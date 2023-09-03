@@ -68,3 +68,38 @@ p5WithCleanup(visitPixels, 'visitPixels');
 
 # %% [markdown]
 There's a 'play' button below and to the left of the source code. Press to run again, and by all means tinker the numbers and the code of the sketch.
+
+## Common factors
+
+Let's also look at a quick example where the pixel count and the increment amount do have a common factor.  Now not all the pixels are visited.
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+await import('../../p5/lib/p5.js');
+
+var commonFactor = (p) => {
+    var index = 0;
+    var increment = 4;
+    var count;
+    var pointsPerFrame = 10;
+
+    p.setup = () => {
+        p.createCanvas(50, 50);
+        count = p.width * p.height;
+    };
+
+    p.draw = () => {
+        p.noSmooth();
+        for (var n = 0; n < pointsPerFrame; ++n) {
+            index = (index + increment) % count;
+            var x = index / p.width;
+            var y = index % p.width;
+            p.set(x, y, 0);
+        }
+        p.updatePixels();
+    };
+};
+
+p5WithCleanup(commonFactor, 'commonFactor');

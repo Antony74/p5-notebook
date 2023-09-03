@@ -407,8 +407,8 @@ var displayFractalCurveMap = (createFractalCurveMap) => (p) => {
 # properties:
 #   run_on_load: true
 # ---%%
-var kockSnowflakeSketch = displayFractalCurveMap(createKochSnowflakeForDisplay);
-p5WithCleanup(kockSnowflakeSketch, 'kockSnowflakeSketch');
+var kochSnowflakeSketch = displayFractalCurveMap(createKochSnowflakeForDisplay);
+p5WithCleanup(kochSnowflakeSketch, 'kochSnowflakeSketch');
 
 # %% [markdown]
 # Now start playing with the Hilbert Curve

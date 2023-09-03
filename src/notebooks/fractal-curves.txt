@@ -1,4 +1,6 @@
 # %% [markdown]
+_I haven't finished writing this notebook, which is why it trails off without reaching a conclusion_
+
 # Fractal curves with segmentedMap
 
 When I wrote [in praise of the map function](./in-praise-of-the-map-function.html) I proposed a modest extension of the p5 map function called segmentedMap. Now that was supposed to be the end of it, but while I was walking the dog it suddenly occurred to me that we can call it recursively in order to draw and do creative things with fractal curves such as the Koch Snowflake and the Hilbert Curve.

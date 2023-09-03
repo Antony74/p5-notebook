@@ -96,6 +96,7 @@ const spellcheckMarkdown = (md) => {
             case '?':
             case ';':
             case '2':
+            case '_':
                 words.push('');
                 break;
             default:

@@ -20,6 +20,10 @@ const notebooks = [
         title: 'Tic-tac-toe',
         fileTitle: 'tic-tac-toe',
     },
+    {
+        title: 'Visit all pixels apparently randomly',
+        fileTitle: 'visit-all-pixels-apparently-randomly',
+    }
 ];
 
 const build = async () => {

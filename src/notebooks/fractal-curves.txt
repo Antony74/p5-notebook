@@ -716,3 +716,6 @@ p5WithCleanup(sketch2048, 'sketch2048');
 # ---%%
 var sketch1000 = simpleHilbertCurveSketch(1000);
 p5WithCleanup(sketch1000, 'sketch1000');
+
+# %% [markdown]
+Thanks for reading. See you around on [r/processing](https://www.reddit.com/r/processing/), and I hope you have fun with fractal curves!

@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "scripts": {
         "prettier": "prettier . --write",
-        "start": "node build.js && parcel src/*.html",
+        "start": "node build.js && parcel src/*.html src/notebooks/*.txt",
         "serve-unbuilt": "node build.js && http-server ."
     },
     "repository": {

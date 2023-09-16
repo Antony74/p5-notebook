@@ -4,14 +4,14 @@ const fsp = require('fs/promises');
 
 const copyDir = async (src, dest) => {
     const filenames = await fsp.readdir(src, { withFileTypes: true });
-    filenames
+    return filenames
         .filter((dirent) => dirent.isFile())
-        .forEach((dirent) =>
-            fsp.copyFile(
+        .map((dirent) => {
+            return fsp.copyFile(
                 path.join(src, dirent.name),
                 path.join(dest, dirent.name),
-            ),
-        );
+            );
+        });
 };
 
 const copyLibs = async () => {
@@ -27,7 +27,7 @@ const copyLibs = async () => {
     await fsp.mkdir(path.join(libDir, 'p5'));
     await fsp.mkdir(path.join(libDir, 'p5', 'lib'));
 
-    copyDir(
+    await copyDir(
         path.join(nodeModulesDir, 'starboard-notebook', 'dist'),
         path.join(libDir, 'starboard-notebook', 'dist'),
     );

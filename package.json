@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "scripts": {
         "prettier": "prettier . --write",
-        "start": "node build.js && http-server ."
+        "start": "node build.js && parcel src/*.html"
     },
     "repository": {
         "type": "git",
@@ -20,9 +20,11 @@
         "starboard-notebook": "^0.15.7"
     },
     "devDependencies": {
+        "css": "^3.0.0",
         "http-server": "^14.1.1",
         "markdown-spellcheck": "^1.3.1",
         "mustache": "^4.2.0",
+        "parcel": "^2.9.3",
         "prettier": "^3.0.2",
         "rimraf": "^5.0.1"
     },

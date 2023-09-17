@@ -40,8 +40,10 @@ const copyDir = async (src, dest) => {
 const copyLibs = async () => {
     const nodeModulesDir = path.join(__dirname, 'node_modules');
     const libDir = path.join(__dirname, 'lib');
+    const distDir = path.join(__dirname, 'dist');
 
     await rimraf(libDir);
+    await rimraf(distDir);
     await fsp.mkdir(libDir);
     await fsp.mkdir(path.join(libDir, 'github-fork-ribbon-css'));
     await fsp.mkdir(path.join(libDir, 'coi-serviceworker'));

@@ -1,0 +1,13 @@
+{
+    "extends": "@parcel/config-default",
+    "transformers": {
+        "*.{txt,map,ico,woff2,ttf}": [
+            "...",
+            "@parcel/transformer-raw"
+        ],
+        "*p5.js": [
+            "...",
+            "@parcel/transformer-raw"
+        ]
+    }
+}

@@ -1,0 +1,103 @@
+# %% [markdown]
+# Visit all pixels apparently randomly
+
+[This question](https://www.reddit.com/r/processing/comments/167wz51/find_random_pixel/jyu637b/?context=3) was asked on r/processing.
+
+My proposed solution doesn't work, the pixels fill in a stubbornly regular pattern, although using a pixel count and an increment which are co-prime does ensure that every pixel gets filled.
+
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   run_on_load: true
+# ---%%
+var p5WithCleanup = (sketch, text) => {
+    if (!window.sketches) {
+        window.sketches = {};
+    }
+
+    if (window.sketches[text]) {
+        window.sketches[text].remove();
+    }
+
+    const matchedElements = Array.from(
+        document.querySelectorAll('.cell-bottom'),
+    );
+
+    const matchedElement = matchedElements.find(
+        (elm) => elm.parentElement.textContent.split(text).length > 1,
+    );
+
+    if (!matchedElement) {
+        throw new Error(`p5WithCleanup: text not found '${text}'`);
+    }
+
+    const p5Instance = new p5(sketch, matchedElement);
+    window.sketches[text] = p5Instance;
+    return p5Instance;
+};
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+await import('../../p5/lib/p5.js');
+
+var visitPixels = (p) => {
+    var index = -1;
+    var increment = 7639;
+    var count;
+    var pointsPerFrame = 10;
+
+    p.setup = () => {
+        p.createCanvas(53, 53);
+        count = p.width * p.height;
+    };
+
+    p.draw = () => {
+        for (var n = 0; n < pointsPerFrame; ++n) {
+            index = (index + increment) % count;
+            var x = index / p.width;
+            var y = index % p.width;
+            p.set(x, y, 0);
+        }
+        p.updatePixels();
+    };
+};
+
+p5WithCleanup(visitPixels, 'visitPixels');
+
+# %% [markdown]
+There's a 'play' button below and to the left of the source code. Press to run again, and by all means tinker the numbers and the code of the sketch.
+
+## Common factors
+
+Let's also look at a quick example where the pixel count and the increment amount do have a common factor. Now not all the pixels are visited.
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var commonFactor = (p) => {
+    var index = 0;
+    var increment = 4;
+    var count;
+    var pointsPerFrame = 10;
+
+    p.setup = () => {
+        p.createCanvas(50, 50);
+        count = p.width * p.height;
+    };
+
+    p.draw = () => {
+        p.noSmooth();
+        for (var n = 0; n < pointsPerFrame; ++n) {
+            index = (index + increment) % count;
+            var x = index / p.width;
+            var y = index % p.width;
+            p.set(x, y, 0);
+        }
+        p.updatePixels();
+    };
+};
+
+p5WithCleanup(commonFactor, 'commonFactor');

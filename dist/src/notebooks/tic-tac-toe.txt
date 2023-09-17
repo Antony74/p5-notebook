@@ -1,0 +1,156 @@
+# %% [markdown]
+# Tic-tac-toe
+
+Here I was investigating a question on r/explainlikeimfive [How many total combinations are there in tic tac toe?](https://www.reddit.com/r/explainlikeimfive/comments/15rlp9e/eli5_how_many_total_combinations_are_there_in_tic/)
+
+At some point I might get around to writing this up.
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var winningCells = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6],
+];
+
+// getGameState
+//     board - a nine character string of 'X', 'O', and ' '
+// returns:
+//     ' ' - game is still being played
+//     'X' - X wins
+//     'O' - O wins
+//     '=' - Draw
+var getGameState = (board) => {
+    if (board.length !== 9) {
+        throw new Error(`${board} is not a tic-tac-toe board`);
+    }
+
+    for ([a, b, c] of winningCells) {
+        if (
+            board[a] !== ' ' &&
+            board[a] === board[b] &&
+            board[a] === board[c]
+        ) {
+            return board[a];
+        }
+    }
+
+    // Draw or ongoing?
+
+    return board.split('').filter((pos) => pos !== ' ').length === 9
+        ? '='
+        : ' ';
+};
+
+var nextGameStates = (board) => {
+    if (getGameState(board) !== ' ') {
+        return []; // Game over
+    }
+
+    boardArray = board.split('');
+
+    var whoseMove =
+        boardArray.filter((o) => o === 'O').length <
+        boardArray.filter((x) => x === 'X').length
+            ? 'O'
+            : 'X';
+
+    return boardArray.reduce((acc, value, index) => {
+        if (value === ' ') {
+            const newBoard =
+                board.substring(0, index) +
+                whoseMove +
+                board.substring(index + 1);
+            return [...acc, newBoard];
+        } else {
+            return acc;
+        }
+    }, []);
+};
+
+var getAllGameStates = (initialState) => {
+    allGameStates.push(initialState);
+
+    return nextGameStates(initialState).forEach((value) => {
+        getAllGameStates(value);
+    });
+};
+
+var allGameStates = [];
+getAllGameStates('         ');
+
+# %% [markdown]
+Now let's put it to the test.
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+console.log(`Total games states ${allGameStates.length}`);
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var xWins = allGameStates.filter((value) => {
+    return getGameState(value) === 'X';
+});
+
+var oWins = allGameStates.filter((value) => {
+    return getGameState(value) === 'O';
+});
+
+var wins = allGameStates.filter((value) => {
+    var state = getGameState(value);
+    return state === 'X' || state === 'O';
+});
+
+var draws = allGameStates.filter((value) => {
+    return getGameState(value) === '=';
+});
+
+var games = allGameStates.filter((value) => {
+    return getGameState(value) !== ' ';
+});
+
+console.log(`Total games ${games.length}`);
+console.log(`    which draw ${draws.length}`);
+console.log(`    where someone wins ${wins.length}`);
+console.log(`        X wins ${xWins.length}`);
+console.log(`        O wins ${oWins.length}`);
+
+# %% [markdown]
+Now let's consider unique states.
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var unique = (arr) => [...new Set(arr)];
+
+console.log(`Unique game states ${unique(allGameStates).length}`);
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+console.log(`Total unique end of game states ${unique(games).length}`);
+console.log(`    which draw ${unique(draws).length}`);
+console.log(`    where someone wins ${unique(wins).length}`);
+console.log(`        X wins ${unique(xWins).length}`);
+console.log(`        O wins ${unique(oWins).length}`);
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var uniqueGameStates = unique(allGameStates).length;
+
+console.log(`Total games states ${uniqueGameStates}`);

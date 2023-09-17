@@ -1,0 +1,721 @@
+# %% [markdown]
+# Fractal curves with segmentedMap
+
+When I wrote [in praise of the map function](./in-praise-of-the-map-function.html) I proposed a modest extension of the p5 map function called segmentedMap. Now that was supposed to be the end of it, but while I was walking the dog it suddenly occurred to me that we can call it recursively in order to draw and do creative things with fractal curves such as the Koch Snowflake and the Hilbert Curve.
+
+## Vectorizing the map function
+
+Actually I was wrong - a variant of the (scalar) map function gives you an interesting and creative way of getting from point A to point B, but to draw these curves we sometimes need to go sideways.. which means we need to know which way sideways is... something we need both the x and y coordinate in order to determine.
+
+So lets write a version of the map function that uses vectors, rather than a single (scalar) value for its target range. This is probably a good thing anyway, as intermediate to advanced programmers usually find it more convenient to think and code with vectors.
+
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   run_on_load: true
+# ---%%
+var p5WithCleanup = (sketch, text) => {
+    if (!window.sketches) {
+        window.sketches = {};
+    }
+
+    if (window.sketches[text]) {
+        window.sketches[text].remove();
+    }
+
+    const matchedElements = Array.from(
+        document.querySelectorAll('.cell-bottom'),
+    );
+
+    const matchedElement = matchedElements.find(
+        (elm) => elm.parentElement.textContent.split(text).length > 1,
+    );
+
+    if (!matchedElement) {
+        throw new Error(`p5WithCleanup: text not found '${text}'`);
+    }
+
+    const p5Instance = new p5(sketch, matchedElement);
+    window.sketches[text] = p5Instance;
+    return p5Instance;
+};
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+await import('../../p5/lib/p5.js');
+
+var createVectorMapFn = (p) => {
+    var vectorMap = (n, start1, stop1, start2, stop2) => {
+        return p.createVector(
+            p.map(n, start1, stop1, start2.x, stop2.x),
+            p.map(n, start1, stop1, start2.y, stop2.y),
+        );
+    };
+
+    return { vectorMap };
+};
+
+# %% [markdown]
+Nothing exciting there, we're just calling the map function twice, first to map the x-coordinate then to map the y-coordinate, and creating a new vector from the result.
+
+## Example sketch: Moving a Circle
+
+This was the most simple animation I could think of with the (scalar) map function:
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var animatedCircle = (p) => {
+    var animationLength = 200;
+
+    p.setup = () => {
+        p.createCanvas(300, 300);
+    };
+
+    p.draw = () => {
+        p.background(200);
+
+        var xStart = 50;
+        var yStart = 250;
+        var xStop = 250;
+        var yStop = 50;
+        var frame = p.frameCount % animationLength;
+        var x = p.map(frame, 1, animationLength, xStart, xStop);
+        var y = p.map(frame, 1, animationLength, yStart, yStop);
+        p.ellipse(x, y, 20);
+    };
+};
+
+p5WithCleanup(animatedCircle, 'animatedCircle');
+
+# %% [markdown]
+Here's what it looks like if we use vectorMap instead:
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var animatedCircleVectorised = (p) => {
+    var animationLength = 200;
+    var { vectorMap } = createVectorMapFn(p);
+
+    p.setup = () => {
+        p.createCanvas(300, 300);
+    };
+
+    p.draw = () => {
+        p.background(200);
+
+        var start = p.createVector(50, 250);
+        var stop = p.createVector(250, 50);
+        var frame = p.frameCount % animationLength;
+
+        var vec = vectorMap(frame, 1, animationLength, start, stop);
+
+        p.ellipse(vec.x, vec.y, 20);
+    };
+};
+
+p5WithCleanup(animatedCircleVectorised, 'animatedCircleVectorised');
+
+# %% [markdown]
+Exactly the same boring animation, but the code is slightly more elegant, maybe?
+
+## A single iteration of the Koch Snowflake
+
+The algorithm for the [Koch Snowflake](https://en.wikipedia.org/wiki/Koch_snowflake) is to recursively mutate each line segment by replacing the middle third of it with the other two sides of an equilateral triangle. I'd probably better draw (a non-recursive example) of that:
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var heightOfEquilateralTriangle = (sideLength) =>
+    (Math.sqrt(3) * sideLength) / 2;
+
+var singleKochSnowflakeStep = (p) => {
+    var animationLength = 200;
+    var { vectorMap } = createVectorMapFn(p);
+
+    p.setup = () => {
+        p.createCanvas(300, 300);
+    };
+
+    p.draw = () => {
+        p.background(200);
+
+        var frame = p.frameCount % animationLength;
+        var drawLineSegment = frame < animationLength / 2;
+
+        var a = p.createVector(150, 250);
+        var e = p.createVector(150, 50);
+
+        var b = vectorMap(1, 0, 3, a, e);
+        var d = vectorMap(2, 0, 3, a, e);
+
+        var sideLength = d.copy().sub(b).mag();
+
+        var c = p.createVector(
+            150 - heightOfEquilateralTriangle(sideLength),
+            p.map(1, 0, 2, a.y, e.y),
+        );
+
+        p.strokeWeight(2);
+        p.noFill();
+
+        if (drawLineSegment) {
+            // Draw line segment
+            p.beginShape();
+            [a, e].forEach((point) => p.vertex(point.x, point.y));
+            p.endShape();
+        } else {
+            // Replace middle third with the other two sides of an equilateral triangle
+            p.beginShape();
+            [a, b, c, d, e].forEach((point) => p.vertex(point.x, point.y));
+            p.endShape();
+        }
+    };
+};
+p5WithCleanup(singleKochSnowflakeStep, 'singleKochSnowflakeStep');
+
+# %% [markdown]
+How did I know the height of an equilateral triangle was `Math.sqrt(3) * sideLength / 2`? I looked it up online, of course ;-)
+
+You can also split the equilateral triangle into two right-angled triangles and use Pythagoras' theorem...
+
+```
+a^2 = b^2 + c^2
+```
+
+...by substituting in the values related to this problem...
+
+```
+sideLength^2 = (sideLength / 2)^2 + heightOfEquilateralTriangle
+```
+
+...then re-arranging until you have `heightOfEquilateralTriangle = Math.sqrt(3) * sideLength / 2`
+
+## segmentedMap
+
+We're nearly ready to express the Koch Snowflake as a map, but first we need to bring the segmentedMap function in:
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var map = (n, start1, stop1, start2, stop2) => {
+    return ((n - start1) / (stop1 - start1)) * (stop2 - start2) + start2;
+};
+
+var segmentedMap = (value, range1, range2, maps) => {
+    if (range1.length !== range2.length) {
+        throw new Error('segmentedMap range arrays not equal');
+    }
+
+    const n = range1.findIndex((t) => t > value);
+    switch (n) {
+        case 0:
+            return range2[0];
+        case -1:
+            return range2[range2.length - 1];
+        default:
+            var currentMap = maps && maps[n - 1] ? maps[n - 1] : map;
+            return currentMap(
+                value,
+                range1[n - 1],
+                range1[n],
+                range2[n - 1],
+                range2[n],
+            );
+    }
+};
+
+# %% [markdown]
+This is the same code I used in [in praise of the map function](./in-praise-of-the-map-function.html). I haven't had to adjust it at all to allow for the fact we're now working with vectors, because the elements of range2 just get passed to another map without being used in any other way, and the returned value just gets passed through too.
+
+# kochSnowflakeMap
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var createKochSnowflakemapFn = (p) => {
+    var { vectorMap } = createVectorMapFn(p);
+
+    var kochSnowflakeMap = (depth) => (n, start1, stop1, start2, stop2) => {
+        var ratio = map(n, start1, stop1, 0, 1);
+
+        var b = vectorMap(2, 0, 6, start2, stop2);
+        var c = vectorMap(3, 0, 6, start2, stop2);
+        var d = vectorMap(4, 0, 6, start2, stop2);
+
+        var bdNormal = d.copy().sub(b).rotate(p.HALF_PI);
+        bdNormal.setMag(heightOfEquilateralTriangle(bdNormal.mag()));
+
+        c.sub(bdNormal);
+
+        var nextMap = depth <= 1 ? vectorMap : kochSnowflakeMap(depth - 1);
+
+        return segmentedMap(
+            ratio,
+            [0, 0.25, 0.5, 0.75, 1],
+            [start2, b, c, d, stop2],
+            [nextMap, nextMap, nextMap, nextMap],
+        );
+    };
+
+    return { kochSnowflakeMap, vectorMap };
+};
+
+# %% [markdown]
+As promised, at each iteration we replace each line segment with four line segments, and this is implemented by calling segmentedMap recursively.
+
+It's not difficult to draw the Koch Snowflake, but the nice thing about having it in a map is it separates the logic of its shape from whatever we might want to do with it. The same is true of any other well defined application programming interface (API) of course. We don't have to fully understand a piece of code in order to take it away and do cool things with it. (Large systems would never get maintained if we had to understand more than the area of the code where we're currently open, as they may be hundreds of thousands or millions of lines long).
+
+There's a little bit more to do, because we need to define the initial three sides of the Koch Snowflake, and arrange them nicely within the bounds of a sketch.
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var createKochSnowflakeForDisplay = (p) => {
+    var { kochSnowflakeMap, vectorMap } = createKochSnowflakemapFn(p);
+
+    return (depth) => (value, start1, stop1) => {
+        var range1 = [];
+        var range2 = [];
+
+        var value03 = p.map(value, start1, stop1, 0, 3);
+
+        var nextMap = depth <= 1 ? vectorMap : kochSnowflakeMap(depth - 1);
+
+        var radius = 220;
+        var centre = p.createVector(p.width / 2, p.height / 2);
+
+        for (var n = 0; n < 4; ++n) {
+            range1.push(n);
+
+            var angle = p.map(n, 0, 3, 0, p.TWO_PI) - p.HALF_PI;
+
+            var vec = p.createVector(
+                radius * Math.cos(angle),
+                radius * Math.sin(angle),
+            );
+
+            range2.push(vec.add(centre));
+        }
+
+        return segmentedMap(value03, range1, range2, [
+            nextMap,
+            nextMap,
+            nextMap,
+        ]);
+    };
+};
+
+# %% [markdown]
+# A sketch to display fractal curves
+
+Now let's write a sketch to display fractal curves.
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var displayFractalCurveMap = (createFractalCurveMap) => (p) => {
+    var fractalCurveMap = createFractalCurveMap(p);
+    var depths = [1, 2, 3, 4, 5, 6, 7];
+
+    var pause = 96;
+    var short = 128;
+    var medium = 256;
+    var long = 512;
+
+    var animationSections = [
+        0,
+        short,
+        pause,
+        medium,
+        pause,
+        medium,
+        pause,
+        long,
+        pause,
+        long,
+        pause,
+        long,
+        pause,
+    ].reduce((acc, value) => {
+        var add = acc.length ? acc[acc.length - 1] : 0;
+        return [...acc, value + add];
+    }, []);
+
+    var animationLength = animationSections[animationSections.length - 1];
+    var backgroundColor = 244;
+
+    p.setup = () => {
+        p.createCanvas(480, 480);
+        p.background(backgroundColor);
+    };
+
+    p.draw = () => {
+        var frame = p.frameCount % animationLength;
+        var index = animationSections.findIndex((v) => v > frame) - 1;
+
+        if (index === -1) {
+            throw new Error(
+                `Could not find index for frame ${frame} in ${animationSections}`,
+            );
+        }
+
+        if (index % 2) {
+            return; // Odd numbered animation sections are for pauses
+        }
+
+        var currentMap = fractalCurveMap(depths[index / 2]);
+        var sectionStart = animationSections[index];
+        var sectionLength = animationSections[index + 1] - sectionStart;
+        frame -= sectionStart;
+
+        if (frame === 0) {
+            p.background(backgroundColor);
+        }
+
+        p.strokeWeight(2);
+        p.noFill();
+
+        var pointsPerFrame = 16;
+
+        p.beginShape();
+        for (var n = 0; n < pointsPerFrame; ++n) {
+            var pos = p.map(n, 0, pointsPerFrame, frame - 1, frame + 1);
+            var point = currentMap(pos, 0, sectionLength);
+            p.vertex(point.x, point.y);
+        }
+        p.endShape();
+    };
+};
+
+# %% [markdown]
+# The Koch Snowflake
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var kochSnowflakeSketch = displayFractalCurveMap(createKochSnowflakeForDisplay);
+p5WithCleanup(kochSnowflakeSketch, 'kochSnowflakeSketch');
+
+# %% [markdown]
+## The Hilbert Curve
+
+I promised the Hilbert space-filling curve as a second example of a fractal curve. I was hoping it would be more of the same, but it's a bit different to construct.
+
+We start with an inverted horseshoe (cup, or u-shape), consisting of four points, which we're going to join in a clockwise direction.
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var hilbertCurveDepthOne = (p) => {
+    p.setup = () => {
+        p.createCanvas(300, 300);
+        p.background(200);
+        p.strokeWeight(2);
+        p.noFill();
+
+        p.beginShape();
+        p.vertex(76, 224);
+        p.vertex(76, 76);
+        p.vertex(224, 76);
+        p.vertex(224, 224);
+        p.endShape();
+    };
+};
+p5WithCleanup(hilbertCurveDepthOne, 'hilbertCurveDepthOne');
+
+# %% [markdown]
+In order to iterate, we replace each of the four points with another horseshoe. Also we turn the two lower horseshoes to face inwards, like this:
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var hilbertCurveDepthOneAndAHalf = (p) => {
+    p.setup = () => {
+        p.createCanvas(300, 300);
+        p.background(200);
+        p.strokeWeight(2);
+        p.noFill();
+
+        p.beginShape();
+        p.vertex(39, 261);
+        p.vertex(113, 261);
+        p.vertex(113, 187);
+        p.vertex(39, 187);
+        p.endShape();
+
+        p.beginShape();
+        p.vertex(39, 113);
+        p.vertex(39, 39);
+        p.vertex(113, 39);
+        p.vertex(113, 113);
+        p.endShape();
+
+        p.beginShape();
+        p.vertex(187, 113);
+        p.vertex(187, 39);
+        p.vertex(261, 39);
+        p.vertex(261, 113);
+        p.endShape();
+
+        p.beginShape();
+        p.vertex(261, 187);
+        p.vertex(187, 187);
+        p.vertex(187, 261);
+        p.vertex(261, 261);
+        p.endShape();
+    };
+};
+p5WithCleanup(hilbertCurveDepthOneAndAHalf, 'hilbertCurveDepthOneAndAHalf');
+
+# %% [markdown]
+Finally we join the horseshoes in the direction indicated by the original horseshoe.
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var hilbertCurveDepthTwo = (p) => {
+    p.setup = () => {
+        p.createCanvas(300, 300);
+        p.background(200);
+        p.strokeWeight(2);
+        p.noFill();
+
+        p.beginShape();
+        p.vertex(39, 261);
+        p.vertex(113, 261);
+        p.vertex(113, 187);
+        p.vertex(39, 187);
+        p.vertex(39, 113);
+        p.vertex(39, 39);
+        p.vertex(113, 39);
+        p.vertex(113, 113);
+        p.vertex(187, 113);
+        p.vertex(187, 39);
+        p.vertex(261, 39);
+        p.vertex(261, 113);
+        p.vertex(261, 187);
+        p.vertex(187, 187);
+        p.vertex(187, 261);
+        p.vertex(261, 261);
+        p.endShape();
+    };
+};
+p5WithCleanup(hilbertCurveDepthTwo, 'hilbertCurveDepthTwo');
+
+# %% [markdown]
+It's this final step which interferes with the plan to construct segmented maps recursively. But we can still construct arrays of points recursively, and segmentedMap is still a great way to join these points. So let's define some functions to do that.
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var createHilbertCurveFunctions = (p) => {
+    var { vectorMap } = createVectorMapFn(p);
+
+    var hilbertCurvePoints = (centre, radius, angle, direction, depth) => {
+        var result = [1.5, 2.5, 3.5, 4.5].map((corner) => {
+            var theta = Math.sign(direction) * (p.HALF_PI * corner + angle);
+            var vec = p.createVector(
+                radius * Math.cos(theta),
+                radius * Math.sin(theta),
+            );
+            return vec.add(centre);
+        });
+
+        if (depth <= 1) {
+            return result;
+        }
+
+        return result.reduce((acc, point, index) => {
+            var newAngle = angle;
+            var newDirection = direction;
+
+            switch (index) {
+                case 0:
+                    newAngle += p.HALF_PI * direction;
+                    newDirection *= -1;
+                    break;
+                case 3:
+                    newAngle -= p.HALF_PI * direction;
+                    newDirection *= -1;
+                    break;
+            }
+
+            return [].concat.apply(
+                acc,
+                hilbertCurvePoints(
+                    point,
+                    radius / 2,
+                    newAngle,
+                    newDirection,
+                    depth - 1,
+                ),
+            );
+        }, []);
+    };
+
+    var hilbertCurveForDisplayUncached = (depth) => {
+        var centre = p.createVector(0.5 * p.width, 0.5 * p.height);
+        var radius = Math.min(0.35 * p.width, 0.35 * p.height);
+
+        var curvePoints = hilbertCurvePoints(centre, radius, 0, 1, depth);
+
+        var maps = Array.from({ length: curvePoints.length }).fill(vectorMap);
+
+        return (n, start1, stop1) => {
+            var ranges = Array.from({ length: curvePoints.length }).map(
+                (v, index) =>
+                    p.map(index, 0, curvePoints.length, start1, stop1),
+            );
+
+            return segmentedMap(n, ranges, curvePoints, maps);
+        };
+
+        return hilbertCurveMap;
+    };
+
+    return { hilbertCurveForDisplayUncached, hilbertCurvePoints, vectorMap };
+};
+
+var createHilbertCurveForDisplay = (p) => {
+    var { hilbertCurveForDisplayUncached } = createHilbertCurveFunctions(p);
+    var cache = {};
+
+    var hilbertCurveForDisplay = (depth) => {
+        var returnValue = cache[depth];
+
+        if (!returnValue) {
+            returnValue = hilbertCurveForDisplayUncached(depth);
+            cache[depth] = returnValue;
+        }
+        return returnValue;
+    };
+
+    return hilbertCurveForDisplay;
+};
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var hilbertCurveSketch = displayFractalCurveMap(createHilbertCurveForDisplay);
+p5WithCleanup(hilbertCurveSketch, 'hilbertCurveSketch');
+
+# %% [markdown]
+## Conclusions - creative coding with fractal curves
+
+Sometimes I think I'm profoundly uncreative, and the real creative coding starts where I leave off.
+
+I've captured these fractal curves in functions, but is there a more interesting way we could display them? A better sketch that could be written with them than the moving line I've used here?
+
+We've seen how the Koch Snowflake is constructed by iteratively replacing a single line segment with four line segments. What other interesting fractal curves could we draw by replacing a single line segment with a small number of different line segments?
+
+The space filling curves are perhaps harder to work with, and the Hilbert curve is probably the simplest example - and other space filling curve is likely to require we iterate on more than four points (perhaps six or nine). Also I wonder if they all look sort of the same after a few iterations. Maybe a fractal curve which didn't fill all of the space would be more interesting?
+
+## Bonus variations
+
+Having said I'm profoundly uncreative, here's a few curious variations I stumbled upon while working on this. Originally bugs in my code which may be more like happy accidents.
+
+### Inward facing Koch Snowflake
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var createInwardsKochSnowflakeForDisplay = (p) => {
+    var { kochSnowflakeMap, vectorMap } = createKochSnowflakemapFn(p);
+
+    return (depth) => (value, start1, stop1) => {
+        var range1 = [];
+        var range2 = [];
+
+        var value03 = p.map(value, start1, stop1, 0, 3);
+
+        var nextMap = depth <= 1 ? vectorMap : kochSnowflakeMap(depth - 1);
+
+        var radius = 220;
+        var centre = p.createVector(p.width / 2, p.height / 2);
+
+        for (var n = 0; n < 4; ++n) {
+            range1.push(n);
+
+            var angle = p.map(n, 0, 3, 0, p.TWO_PI) - p.HALF_PI;
+
+            var vec = p.createVector(
+                radius * Math.cos(angle),
+                radius * Math.sin(angle),
+            );
+
+            range2.push(vec.add(centre));
+        }
+
+        return segmentedMap(value03, range1, range2.reverse(), [
+            nextMap,
+            nextMap,
+            nextMap,
+        ]);
+    };
+};
+var inwardsKochSnowflake = displayFractalCurveMap(
+    createInwardsKochSnowflakeForDisplay,
+);
+p5WithCleanup(inwardsKochSnowflake, 'inwardsKochSnowflake');
+
+# %% [markdown]
+### Hilbert space filling curve without sampling enough points
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var simpleHilbertCurveSketch = (points) => (p) => {
+    p.setup = () => {
+        p.createCanvas(300, 300);
+        var curve = createHilbertCurveForDisplay(p)(6);
+        p.background(200);
+        p.strokeWeight(2);
+        p.noFill();
+
+        p.beginShape();
+        for (var n = 0; n < points; ++n) {
+            var point = curve(n, 0, points);
+            p.vertex(point.x, point.y);
+        }
+        p.endShape();
+    };
+};
+
+var sketch512 = simpleHilbertCurveSketch(512);
+p5WithCleanup(sketch512, 'sketch512');
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var sketch2048 = simpleHilbertCurveSketch(2048);
+p5WithCleanup(sketch2048, 'sketch2048');
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var sketch1000 = simpleHilbertCurveSketch(1000);
+p5WithCleanup(sketch1000, 'sketch1000');
+
+# %% [markdown]
+Thanks for reading. See you around on [r/processing](https://www.reddit.com/r/processing/), and I hope you have fun with fractal curves!

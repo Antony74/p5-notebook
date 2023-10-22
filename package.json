@@ -2,9 +2,9 @@
     "name": "p5-notebook",
     "version": "1.0.0",
     "scripts": {
-        "parcel-start": "node build.js && parcel src/*.html src/notebooks/*.txt lib/starboard-notebook/dist/* lib/p5/lib/p5.js",
+        "parcel-start": "rimraf dist && build.js && parcel src/*.html src/notebooks/*.txt lib/starboard-notebook/dist/* lib/p5/lib/p5.js",
         "prettier": "prettier . --write",
-        "start": "node build.js && http-server ."
+        "start": "node build.js && http-server .."
     },
     "repository": {
         "type": "git",

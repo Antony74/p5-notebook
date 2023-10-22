@@ -2,7 +2,7 @@
     "name": "p5-notebook",
     "version": "1.0.0",
     "scripts": {
-        "parcel-start": "rimraf dist && build.js && parcel src/*.html src/notebooks/*.txt lib/starboard-notebook/dist/* lib/p5/lib/p5.js --public-url /p5-notebook/dist",
+        "parcel-build": "rimraf dist && build.js && parcel build src/*.html src/notebooks/*.txt lib/starboard-notebook/dist/* lib/p5/lib/p5.js --public-url /p5-notebook/dist",
         "prettier": "prettier . --write",
         "start": "node build.js && http-server .."
     },

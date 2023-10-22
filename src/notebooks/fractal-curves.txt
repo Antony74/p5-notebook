@@ -44,7 +44,7 @@ var p5WithCleanup = (sketch, text) => {
 # properties:
 #   run_on_load: true
 # ---%%
-await import('../../p5/lib/p5.js');
+await import('/p5-notebook/lib/p5/lib/p5.js');
 
 var createVectorMapFn = (p) => {
     var vectorMap = (n, start1, stop1, start2, stop2) => {

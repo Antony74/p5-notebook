@@ -47,7 +47,7 @@ So let's get some house-keeping out of the way, then have a look at a sketch whi
 #   run_on_load: true
 # ---%%
 // Import the p5 library, see the docs here: https://p5js.org/
-await import('../../p5/lib/p5.js');
+await import('/p5-notebook/lib/p5/lib/p5.js');
 
 # %% [markdown]
 ## Example sketch: Assembly Line

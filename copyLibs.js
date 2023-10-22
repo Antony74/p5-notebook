@@ -19,9 +19,20 @@ const copyDir = async (src, dest) => {
                     );
 
                     const json = css.parse(cssText);
-                    json.stylesheet.rules = json.stylesheet.rules.filter(
-                        (rule) => rule.type !== 'font-face',
-                    );
+                    
+                    json.stylesheet.rules.forEach((rule) => {
+                        if (rule.type === 'font-face') {
+                            for (n = 0; n < rule.declarations.length; ++n) {
+                                const { property, value } =
+                                    rule.declarations[n];
+
+                                if (property === 'src') {
+                                    rule.declarations[n].value =
+                                        value.split(',')[0];
+                                }
+                            }
+                        }
+                    });
 
                     await fsp.writeFile(
                         path.join(dest, dirent.name),

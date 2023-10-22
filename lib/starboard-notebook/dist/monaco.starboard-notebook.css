@@ -2334,6 +2334,11 @@
   margin-right: .5em;
 }
 
+@font-face {
+  font-family: codicon;
+  src: url(codicon.ttf) format("truetype");
+}
+
 .codicon[class*=codicon-] {
   font: 16px/1 codicon;
   display: inline-block;

@@ -1,0 +1,127 @@
+# %% [markdown]
+# Interpolate Mitosis
+
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   run_on_load: true
+# ---%%
+var p5WithCleanup = (sketch, text) => {
+    if (!window.sketches) {
+        window.sketches = {};
+    }
+
+    if (window.sketches[text]) {
+        window.sketches[text].remove();
+    }
+
+    const matchedElements = Array.from(
+        document.querySelectorAll('.cell-bottom'),
+    );
+
+    const matchedElement = matchedElements.find(
+        (elm) => elm.parentElement.textContent.split(text).length > 1,
+    );
+
+    if (!matchedElement) {
+        throw new Error(`p5WithCleanup: text not found '${text}'`);
+    }
+
+    const p5Instance = new p5(sketch, matchedElement);
+    window.sketches[text] = p5Instance;
+    return p5Instance;
+};
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+await import('/p5-notebook/lib/p5/lib/p5.js');
+
+var interpolateMitosis = (p) => {
+    var pointCount = 24;
+    var halfPointCount = pointCount / 2;
+    var animationLength = 100;
+    var pointsStart = [];
+    var pointsEnd = [];
+
+    p.setup = () => {
+        p.createCanvas(500, 500);
+
+        var radius = p.width * 0.2;
+        var xCenter = p.width / 2;
+        var yCenter = p.height / 2;
+
+        for (var n = 0; n < pointCount; ++n) {
+            var theta = p.map(
+                n,
+                0,
+                pointCount,
+                p.TWO_PI - p.HALF_PI,
+                -p.HALF_PI,
+            );
+            var x = xCenter + radius * Math.cos(theta);
+            var y = yCenter + radius * Math.sin(theta);
+            pointsStart.push([x, y]);
+
+            if (n <= halfPointCount) {
+                xCenterEnd = xCenter - radius;
+
+                theta = p.map(n, 0, halfPointCount, p.TWO_PI, 0);
+            } else {
+                xCenterEnd = xCenter + radius;
+
+                theta = p.map(n, halfPointCount, pointCount, p.PI * 3, p.PI);
+            }
+
+            x = xCenterEnd + radius * Math.cos(theta);
+            y = yCenter + radius * Math.sin(theta);
+            pointsEnd.push([x, y]);
+        }
+    };
+
+    p.draw = () => {
+        p.background(255);
+        p.noFill();
+
+        var direction = Math.floor(p.frameCount / animationLength) % 2;
+        var pos = p.frameCount % animationLength;
+
+        if (direction) {
+            pos = animationLength - pos;
+        }
+
+        var qPointCount = pointCount / 4;
+
+        p.beginShape();
+
+        for (
+            var index = qPointCount;
+            index < pointCount + qPointCount;
+            ++index
+        ) {
+            var n = index % pointCount;
+
+            p.curveVertex(
+                p.map(
+                    pos,
+                    0,
+                    animationLength,
+                    pointsStart[n][0],
+                    pointsEnd[n][0],
+                ),
+                p.map(
+                    pos,
+                    0,
+                    animationLength,
+                    pointsStart[n][1],
+                    pointsEnd[n][1],
+                ),
+            );
+        }
+
+        p.endShape(p.CLOSE);
+    };
+};
+
+p5WithCleanup(interpolateMitosis, 'interpolateMitosis');

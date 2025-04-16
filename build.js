@@ -23,6 +23,10 @@ const notebooks = [
     {
         title: 'Visit all pixels apparently randomly',
         fileTitle: 'visit-all-pixels-apparently-randomly',
+    }, 
+    {
+        title: 'Interpolate mitosis',
+        fileTitle: 'interpolate-mitosis'
     }
 ];
 

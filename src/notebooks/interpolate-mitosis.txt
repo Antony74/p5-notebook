@@ -49,6 +49,7 @@ var interpolateMitosis = (p) => {
         p.createCanvas(500, 500);
 
         var radius = p.width * 0.2;
+        var smallRadius = radius / 3;
         var xCenter = p.width / 2;
         var yCenter = p.height / 2;
 
@@ -68,14 +69,18 @@ var interpolateMitosis = (p) => {
                 xCenterEnd = xCenter - radius;
 
                 theta = p.map(n, 0, halfPointCount, p.TWO_PI, 0);
+
+                x = xCenterEnd + radius * Math.cos(theta);
+                y = yCenter + radius * Math.sin(theta);
             } else {
-                xCenterEnd = xCenter + radius;
+                xCenterEnd = xCenter + smallRadius;
 
                 theta = p.map(n, halfPointCount, pointCount, p.PI * 3, p.PI);
+
+                x = xCenterEnd + smallRadius * Math.cos(theta);
+                y = yCenter + smallRadius * Math.sin(theta);
             }
 
-            x = xCenterEnd + radius * Math.cos(theta);
-            y = yCenter + radius * Math.sin(theta);
             pointsEnd.push([x, y]);
         }
     };

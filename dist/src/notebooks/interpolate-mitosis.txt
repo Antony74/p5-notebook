@@ -27,11 +27,9 @@ var p5WithCleanup = (sketch, text) => {
         window.sketches[text].remove();
     }
 
-    const matchedElements = Array.from(
-        document.querySelectorAll('.cell-bottom'),
-    );
+    var matchedElements = Array.from(document.querySelectorAll('.cell-bottom'));
 
-    const matchedElement = matchedElements.find(
+    var matchedElement = matchedElements.find(
         (elm) => elm.parentElement.textContent.split(text).length > 1,
     );
 
@@ -39,7 +37,7 @@ var p5WithCleanup = (sketch, text) => {
         throw new Error(`p5WithCleanup: text not found '${text}'`);
     }
 
-    const p5Instance = new p5(sketch, matchedElement);
+    var p5Instance = new p5(sketch, matchedElement);
     window.sketches[text] = p5Instance;
     return p5Instance;
 };
@@ -71,7 +69,7 @@ as is the convention with trig functions).
 # ---%%
 var createCircleMapFn = (p, xCenter, yCenter, radius) => {
     var circleMap = (n, start1, stop1, start2, stop2) => {
-        var theta = n * 2.5;
+        var theta = p.map(n, start1, stop1, start2, stop2);
         return p.createVector(
             xCenter + radius * Math.cos(theta),
             yCenter + radius * Math.sin(theta),
@@ -209,11 +207,11 @@ We can shatter the illusion by plotting the points, and observe them all moving 
 #   run_on_load: true
 # ---%%
 var plotPoints = (p) => {
-    let { pointsStart, pointsEnd } = interpolateMitosis(p);
+    var { pointsStart, pointsEnd } = interpolateMitosis(p);
     var origDraw = p.draw;
 
     p.draw = () => {
-        const points = origDraw();
+        var points = origDraw();
         p.noStroke();
         p.fill(255, 0, 0, 128);
 
@@ -223,8 +221,8 @@ var plotPoints = (p) => {
 
         p.stroke(128);
         for (var n = 0; n < pointsStart.length; ++n) {
-            const start = pointsStart[n];
-            const end = pointsEnd[n];
+            var start = pointsStart[n];
+            var end = pointsEnd[n];
             p.line(start.x, start.y, end.x, end.y);
         }
     };
@@ -242,4 +240,30 @@ the first point, and vice versa.
 # %% [markdown]
 ## Outtake
 
-I think my favorite mistake was when I forgot to map my point indexes to radians.
+I made two very pretty mistakes, neither of which I can't reproduce now. But shuffling the points is fun!
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var shuffle = (arr) => {
+    for (var n = 0; n < arr.length; ++n) {
+        var m = Math.floor(Math.random() * arr.length);
+        var t = arr[n];
+        arr[n] = arr[m];
+        arr[m] = t;
+    }
+};
+
+var shuffleSketch = (p) => {
+    var { pointsStart, pointsEnd } = interpolateMitosis(p);
+    var origSetup = p.setup;
+
+    p.setup = () => {
+        origSetup();
+        shuffle(pointsStart);
+        shuffle(pointsEnd);
+    };
+};
+
+p5WithCleanup(shuffleSketch, 'shuffleSketch');

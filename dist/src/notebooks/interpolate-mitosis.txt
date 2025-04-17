@@ -71,7 +71,7 @@ as is the convention with trig functions).
 # ---%%
 var createCircleMapFn = (p, xCenter, yCenter, radius) => {
     var circleMap = (n, start1, stop1, start2, stop2) => {
-        var theta = p.map(n, start1, stop1, start2, stop2);
+        var theta = n * 2.5;
         return p.createVector(
             xCenter + radius * Math.cos(theta),
             yCenter + radius * Math.sin(theta),
@@ -100,7 +100,7 @@ pointsStart and pointsEnd. Then we can render this as a curved shape.
 #   run_on_load: true
 # ---%%
 var interpolateMitosis = (p) => {
-    var { CLOSE, HALF_PI, PI, TWO_PI } = p;
+    var { CENTER, CLOSE, HALF_PI, PI, TWO_PI } = p;
 
     var pointCount = 24;
     var halfPointCount = pointCount / 2;
@@ -111,7 +111,8 @@ var interpolateMitosis = (p) => {
     var { vectorMap } = createVectorMapFn(p);
 
     p.setup = () => {
-        p.createCanvas(500, 500);
+        p.createCanvas(400, 400);
+        p.rectMode(CENTER);
 
         var radius = p.width * 0.2;
         var smallRadius = radius / 3;
@@ -151,6 +152,7 @@ var interpolateMitosis = (p) => {
 
     p.draw = () => {
         p.background(255);
+        p.stroke(0);
         p.noFill();
 
         var direction = Math.floor(p.frameCount / animationLength) % 2;
@@ -161,6 +163,7 @@ var interpolateMitosis = (p) => {
             pos = animationLength - pos;
         }
 
+        var points = [];
         var qPointCount = pointCount / 4;
 
         p.beginShape();
@@ -180,11 +183,63 @@ var interpolateMitosis = (p) => {
                 pointsEnd[n],
             );
 
+            points.push(vec);
             p.curveVertex(vec.x, vec.y);
         }
 
         p.endShape(p.CLOSE);
+
+        return points;
     };
+
+    return { pointsStart, pointsEnd };
 };
 
 p5WithCleanup(interpolateMitosis, 'interpolateMitosis');
+
+# %% [markdown]
+## Conclusion
+
+So, how do you like the final output?
+I think it looks fairly slick for the application of a relatively simple idea.
+We can shatter the illusion by plotting the points, and observe them all moving in straight lines.
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var plotPoints = (p) => {
+    let { pointsStart, pointsEnd } = interpolateMitosis(p);
+    var origDraw = p.draw;
+
+    p.draw = () => {
+        const points = origDraw();
+        p.noStroke();
+        p.fill(255, 0, 0, 128);
+
+        points.forEach((point) => {
+            p.rect(point.x, point.y, 10, 10);
+        });
+
+        p.stroke(128);
+        for (var n = 0; n < pointsStart.length; ++n) {
+            const start = pointsStart[n];
+            const end = pointsEnd[n];
+            p.line(start.x, start.y, end.x, end.y);
+        }
+    };
+};
+
+p5WithCleanup(plotPoints, 'plotPoints');
+
+# %% [markdown]
+The curveVertex function is very convenient, but the only means to control the 'curviness' is to vary the
+number and spacing of points. Beziers are more fiddly, but give you more flexibility.
+Oh, and do you see that 'knobble' at the 9 o'clock position? I don't think p5 closes shapes drawn
+with curves perfectly. But then it might be difficult to get it to consider the last point when curving
+the first point, and vice versa.
+
+# %% [markdown]
+## Outtake
+
+I think my favorite mistake was when I forgot to map my point indexes to radians.

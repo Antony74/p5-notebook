@@ -136,6 +136,9 @@ const spellcheckMarkdown = (md) => {
                 case 'Reddit':
                 case 'pointsStart':
                 case 'pointsEnd':
+                case 'Beziers':
+                case 'knobble':
+                case 'curveVertex':
                     break; // special case
                 default:
                     console.warn(`Word ${word} not recognised`);

@@ -1,6 +1,18 @@
 # %% [markdown]
 # Interpolate Mitosis
 
+A long time ago, someone on a Processing forum asked how to animate cell division, and I gave
+them a simple model where points on a single circle are mapped to points on two circles, then
+an animation between the two is generated via linear interpolation.
+
+I was reminded of this old sketch by a [recent post](https://www.reddit.com/r/p5js/comments/1k0pjz6/is_there_any_way_to_to_this_in_p5js/)
+on the r/p5js sub of Reddit. Not being able to find it, I decided to rewrite it here in p5.
+
+I will be using a lot of map functions. If that's perplexing in any way, try starting with
+[In praise of the map function](./in-praise-of-the-map-function.html).
+
+Let's start by bringing in the vectorMap I wrote for [Fractal Curves](./fractal-curves.html).
+
 # %%--- [javascript]
 # properties:
 #   top_hidden: true
@@ -38,12 +50,65 @@ var p5WithCleanup = (sketch, text) => {
 # ---%%
 await import('/p5-notebook/lib/p5/lib/p5.js');
 
+var createVectorMapFn = (p) => {
+    var vectorMap = (n, start1, stop1, start2, stop2) => {
+        return p.createVector(
+            p.map(n, start1, stop1, start2.x, stop2.x),
+            p.map(n, start1, stop1, start2.y, stop2.y),
+        );
+    };
+
+    return { vectorMap };
+};
+
+# %% [markdown]
+Now here's a map for moving around in a circle (anti-clockwise starting from the 3 o'clock position,
+as is the convention with trig functions).
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var createCircleMapFn = (p, xCenter, yCenter, radius) => {
+    var circleMap = (n, start1, stop1, start2, stop2) => {
+        var theta = p.map(n, start1, stop1, start2, stop2);
+        return p.createVector(
+            xCenter + radius * Math.cos(theta),
+            yCenter + radius * Math.sin(theta),
+        );
+    };
+
+    return circleMap;
+};
+
+# %% [markdown]
+## The Sketch
+
+And now for the rest of the owl.
+
+In the setup function we define pointsStart, which is an array of vectors
+positioned in a circle. Then the pointsEnd, which represent two circles. The tricky bit is lining the
+points up. The main circle has to start drawing from the 12 o'clock position, the left circle from the 3 o'clock
+position, and the right circle from the 9 o'clock position. Which I hope explains what would otherwise be
+eccentric places to begin and end a circle.
+
+In the draw function we have to decide where we are in the animation, and thus where we are on the continuum between
+pointsStart and pointsEnd. Then we can render this as a curved shape.
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
 var interpolateMitosis = (p) => {
+    var { CLOSE, HALF_PI, PI, TWO_PI } = p;
+
     var pointCount = 24;
     var halfPointCount = pointCount / 2;
     var animationLength = 100;
     var pointsStart = [];
     var pointsEnd = [];
+
+    var { vectorMap } = createVectorMapFn(p);
 
     p.setup = () => {
         p.createCanvas(500, 500);
@@ -53,35 +118,34 @@ var interpolateMitosis = (p) => {
         var xCenter = p.width / 2;
         var yCenter = p.height / 2;
 
+        var mainCircleMap = createCircleMapFn(p, xCenter, yCenter, radius);
+
+        var leftCircleMap = createCircleMapFn(
+            p,
+            xCenter - radius,
+            yCenter,
+            radius,
+        );
+
+        var rightCircleMap = createCircleMapFn(
+            p,
+            xCenter + smallRadius,
+            yCenter,
+            smallRadius,
+        );
+
         for (var n = 0; n < pointCount; ++n) {
-            var theta = p.map(
-                n,
-                0,
-                pointCount,
-                p.TWO_PI - p.HALF_PI,
-                -p.HALF_PI,
+            pointsStart.push(
+                mainCircleMap(n, 0, pointCount, TWO_PI - HALF_PI, -HALF_PI),
             );
-            var x = xCenter + radius * Math.cos(theta);
-            var y = yCenter + radius * Math.sin(theta);
-            pointsStart.push([x, y]);
 
             if (n <= halfPointCount) {
-                xCenterEnd = xCenter - radius;
-
-                theta = p.map(n, 0, halfPointCount, p.TWO_PI, 0);
-
-                x = xCenterEnd + radius * Math.cos(theta);
-                y = yCenter + radius * Math.sin(theta);
+                pointsEnd.push(leftCircleMap(n, 0, halfPointCount, TWO_PI, 0));
             } else {
-                xCenterEnd = xCenter + smallRadius;
-
-                theta = p.map(n, halfPointCount, pointCount, p.PI * 3, p.PI);
-
-                x = xCenterEnd + smallRadius * Math.cos(theta);
-                y = yCenter + smallRadius * Math.sin(theta);
+                pointsEnd.push(
+                    rightCircleMap(n, halfPointCount, pointCount, 3 * PI, PI),
+                );
             }
-
-            pointsEnd.push([x, y]);
         }
     };
 
@@ -93,6 +157,7 @@ var interpolateMitosis = (p) => {
         var pos = p.frameCount % animationLength;
 
         if (direction) {
+            // Alternating animation segments run in reverse
             pos = animationLength - pos;
         }
 
@@ -107,22 +172,15 @@ var interpolateMitosis = (p) => {
         ) {
             var n = index % pointCount;
 
-            p.curveVertex(
-                p.map(
-                    pos,
-                    0,
-                    animationLength,
-                    pointsStart[n][0],
-                    pointsEnd[n][0],
-                ),
-                p.map(
-                    pos,
-                    0,
-                    animationLength,
-                    pointsStart[n][1],
-                    pointsEnd[n][1],
-                ),
+            var vec = vectorMap(
+                pos,
+                0,
+                animationLength,
+                pointsStart[n],
+                pointsEnd[n],
             );
+
+            p.curveVertex(vec.x, vec.y);
         }
 
         p.endShape(p.CLOSE);

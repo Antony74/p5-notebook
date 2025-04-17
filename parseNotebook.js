@@ -132,6 +132,10 @@ const spellcheckMarkdown = (md) => {
                 case 'kochSnowflakeMap':
                 case 'tac':
                 case 'explainlikeimfive':
+                case 'p5js':
+                case 'Reddit':
+                case 'pointsStart':
+                case 'pointsEnd':
                     break; // special case
                 default:
                     console.warn(`Word ${word} not recognised`);

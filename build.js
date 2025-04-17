@@ -17,17 +17,17 @@ const notebooks = [
         fileTitle: 'fractal-curves',
     },
     {
+        title: 'Interpolate mitosis',
+        fileTitle: 'interpolate-mitosis',
+    },
+    {
         title: 'Tic-tac-toe',
         fileTitle: 'tic-tac-toe',
     },
     {
         title: 'Visit all pixels apparently randomly',
         fileTitle: 'visit-all-pixels-apparently-randomly',
-    }, 
-    {
-        title: 'Interpolate mitosis',
-        fileTitle: 'interpolate-mitosis'
-    }
+    },
 ];
 
 const build = async () => {
@@ -90,7 +90,6 @@ const build = async () => {
     //
 
     copyLibs();
-
 
     //
     // Write (from template) a html page for each notebook

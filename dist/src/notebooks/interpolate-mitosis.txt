@@ -237,11 +237,8 @@ var plotPoints = (p) => {
 p5WithCleanup(plotPoints, 'plotPoints');
 
 # %% [markdown]
-The curveVertex function is very convenient, but the only means to control the 'curviness' is to vary the
+The curve function is very convenient, but the only means to control the 'curviness' is to vary the
 number and spacing of points. Beziers are more fiddly, but give you more flexibility.
-Oh, and do you see that 'knobble' at the 9 o'clock position? I don't think p5 closes shapes drawn
-with curves perfectly. But then it might be difficult to get it to consider the last point when curving
-the first point, and vice versa.
 
 # %% [markdown]
 ## Outtake

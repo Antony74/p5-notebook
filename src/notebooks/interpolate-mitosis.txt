@@ -148,6 +148,11 @@ var interpolateMitosis = (p) => {
         }
     };
 
+    var flattenVectorArray = (arr) =>
+        arr.reduce((acc, vec) => {
+            return [...acc, vec.x, vec.y];
+        }, []);
+
     p.draw = () => {
         p.background(255);
         p.stroke(0);
@@ -162,15 +167,8 @@ var interpolateMitosis = (p) => {
         }
 
         var points = [];
-        var qPointCount = pointCount / 4;
 
-        p.beginShape();
-
-        for (
-            var index = qPointCount;
-            index < pointCount + qPointCount;
-            ++index
-        ) {
+        for (var index = 0; index < pointCount; ++index) {
             var n = index % pointCount;
 
             var vec = vectorMap(
@@ -182,10 +180,18 @@ var interpolateMitosis = (p) => {
             );
 
             points.push(vec);
-            p.curveVertex(vec.x, vec.y);
         }
 
-        p.endShape(p.CLOSE);
+        for (var index = 0; index < pointCount; ++index) {
+            p.curve(
+                ...flattenVectorArray([
+                    points[(index + 1) % pointCount],
+                    points[(index + 2) % pointCount],
+                    points[(index + 3) % pointCount],
+                    points[(index + 4) % pointCount],
+                ]),
+            );
+        }
 
         return points;
     };

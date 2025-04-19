@@ -1,0 +1,90 @@
+# %% [markdown]
+# Mandelbrot
+
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   run_on_load: true
+# ---%%
+var p5WithCleanup = (sketch, text) => {
+    if (!window.sketches) {
+        window.sketches = {};
+    }
+
+    if (window.sketches[text]) {
+        window.sketches[text].remove();
+    }
+
+    const matchedElements = Array.from(
+        document.querySelectorAll('.cell-bottom'),
+    );
+
+    const matchedElement = matchedElements.find(
+        (elm) => elm.parentElement.textContent.split(text).length > 1,
+    );
+
+    if (!matchedElement) {
+        throw new Error(`p5WithCleanup: text not found '${text}'`);
+    }
+
+    const p5Instance = new p5(sketch, matchedElement);
+    window.sketches[text] = p5Instance;
+    return p5Instance;
+};
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+await import('/p5-notebook/lib/p5/lib/p5.js');
+
+var generateMandelbrotPoint = (a, b, maxIterations) => {
+    var ca = a;
+    var cb = b;
+    var n = 0;
+    while (n < maxIterations) {
+        var aa = a * a - b * b;
+        var bb = 2 * a * b;
+        a = aa + ca;
+        b = bb + cb;
+        if (Math.abs(a + b) > 16) {
+            break;
+        }
+        n++;
+    }
+    if (n === maxIterations) {
+        return -1;
+    }
+    return n;
+};
+
+var mandelbrot = (p) => {
+    var animationLength = 200;
+
+    p.setup = () => {
+        var maxIterations = 15;
+        var pos = 2.5;
+
+        p.createCanvas(300, 300);
+        p.colorMode(p.HSB);
+
+        for (var x = 0; x < p.width; ++x) {
+            for (var y = 0; y < p.height; ++y) {
+                const result = generateMandelbrotPoint(
+                    p.map(x, 0, p.width, -pos - 0.75, pos - 0.75),
+                    p.map(y, 0, p.height, -pos, pos),
+                    maxIterations,
+                );
+
+                if (result === -1) {
+                    p.stroke(0);
+                } else {
+                    p.stroke(p.map(result, 0, maxIterations, 0, 300), 255, 255);
+                }
+                p.point(x, y);
+            }
+        }
+    };
+};
+
+p5WithCleanup(mandelbrot, 'mandelbrot');

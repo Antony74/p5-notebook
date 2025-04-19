@@ -28,6 +28,10 @@ const notebooks = [
         title: 'Visit all pixels apparently randomly',
         fileTitle: 'visit-all-pixels-apparently-randomly',
     },
+    {
+        title: 'Mandelbrot',
+        fileTitle: 'mandelbrot',
+    },
 ];
 
 const build = async () => {

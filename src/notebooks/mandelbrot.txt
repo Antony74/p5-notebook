@@ -59,13 +59,12 @@ var generateMandelbrotPoint = (a, b, maxIterations) => {
 };
 
 var mandelbrot = (p) => {
-    var animationLength = 200;
-
     p.setup = () => {
         var maxIterations = 15;
         var pos = 2.5;
 
         p.createCanvas(300, 300);
+
         p.colorMode(p.HSB);
 
         for (var x = 0; x < p.width; ++x) {
@@ -82,7 +81,7 @@ var mandelbrot = (p) => {
                     p.stroke(p.map(result, 0, maxIterations, 0, 300), 255, 255);
                 }
 
-                p.point(x, y);
+                p.line(x, y, x, y); // This is weird but Firefox does not like p.point
             }
         }
     };

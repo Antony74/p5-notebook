@@ -1,0 +1,62 @@
+# %% [markdown]
+# Metaballs
+
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   run_on_load: true
+# ---%%
+var p5WithCleanup = (sketch, text) => {
+    if (!window.sketches) {
+        window.sketches = {};
+    }
+
+    if (window.sketches[text]) {
+        window.sketches[text].remove();
+    }
+
+    const matchedElements = Array.from(
+        document.querySelectorAll('.cell-bottom'),
+    );
+
+    const matchedElement = matchedElements.find(
+        (elm) => elm.parentElement.textContent.split(text).length > 1,
+    );
+
+    if (!matchedElement) {
+        throw new Error(`p5WithCleanup: text not found '${text}'`);
+    }
+
+    const p5Instance = new p5(sketch, matchedElement);
+    window.sketches[text] = p5Instance;
+    return p5Instance;
+};
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+await import('/p5-notebook/lib/p5/lib/p5.js');
+
+var metaballs = (p) => {
+    p.setup = () => {
+        p.createCanvas(300, 300);
+        p.colorMode(p.HSB);
+
+        var balls = [p.createVector(100, 100), p.createVector(200, 200)];
+
+        for (var x = 0; x < p.width; ++x) {
+            for (var y = 0; y < p.height; ++y) {
+                var sum = 0;
+                for (var index = 0; index < balls.length; ++index) {
+                    var ball = balls[index];
+                    sum += 1 / p.dist(ball.x, ball.y, x, y);
+                }
+                p.stroke(p.map(sum, 0, 0.03, 0, 255), 255, 255);
+                p.line(x, y, x, y); // This is weird but Firefox does not like p.point
+            }
+        }
+    };
+};
+
+p5WithCleanup(metaballs, 'metaballs');

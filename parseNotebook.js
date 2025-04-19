@@ -139,6 +139,7 @@ const spellcheckMarkdown = (md) => {
                 case 'Beziers':
                 case 'knobble':
                 case 'curveVertex':
+                case 'Metaballs':
                     break; // special case
                 default:
                     console.warn(`Word ${word} not recognised`);

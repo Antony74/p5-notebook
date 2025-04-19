@@ -32,6 +32,10 @@ const notebooks = [
         title: 'Mandelbrot',
         fileTitle: 'mandelbrot',
     },
+    {
+        title: 'Metaballs',
+        fileTitle: 'metaballs',
+    }
 ];
 
 const build = async () => {

@@ -1,0 +1,16 @@
+# %% [markdown]
+# Tail Call Optimization (TCO)
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var reverseString = (str, reversed = '') => {
+    if (str === '') {
+        return reversed;
+    } else {
+        return reverseString(str.substring(1), reversed + str[0]);
+    }
+};
+
+console.log(reverseString('hello'));

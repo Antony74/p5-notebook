@@ -9,8 +9,13 @@ var reverseString = (str, reversed = '') => {
     if (str === '') {
         return reversed;
     } else {
-        return reverseString(str.substring(1), reversed + str[0]);
+        return reverseString(
+            str.substring(0, str.length - 1),
+            reversed + str.charAt(str.length - 1),
+        );
     }
 };
 
-console.log(reverseString('hello'));
+var forward = '1234567890qwertyuiopasdfghjklzxcvbnm'.repeat(1000);
+var backward = reverseString(forward);
+console.log(`String reversed: ${backward.slice(0, 100)}`);

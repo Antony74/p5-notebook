@@ -35,10 +35,6 @@ const notebooks = [
     {
         title: 'Metaballs',
         fileTitle: 'metaballs',
-    },
-    {
-        title: 'Tail Call Optimization',
-        fileTitle: 'tail-call-optimization',
     }
 ];
 

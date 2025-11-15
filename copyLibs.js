@@ -14,7 +14,7 @@ const copyDir = async (src, dest) => {
 
                 if (ext === '.css') {
                     const cssText = await fsp.readFile(
-                        path.join(dirent.path, dirent.name),
+                        path.join(src, dirent.name),
                         { encoding: 'utf-8' },
                     );
 

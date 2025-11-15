@@ -4,7 +4,7 @@
     "scripts": {
         "build": "rimraf dist && node build.js && parcel build src/*.html src/notebooks/*.txt lib/starboard-notebook/dist/* lib/p5/lib/p5.js --public-url /p5-notebook/dist",
         "prettier": "prettier . --write",
-        "start": "node build.js && http-server .."
+        "start": "npm run build && http-server .."
     },
     "repository": {
         "type": "git",

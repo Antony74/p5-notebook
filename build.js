@@ -35,7 +35,11 @@ const notebooks = [
     {
         title: 'Metaballs',
         fileTitle: 'metaballs',
-    }
+    },
+    {
+        title: 'Signed distance function for a star',
+        fileTitle: 'sdf-star',
+    },
 ];
 
 const build = async () => {

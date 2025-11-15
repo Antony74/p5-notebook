@@ -47,7 +47,11 @@ var createSetupFunction = (p, sdf) => () => {
     for (var x = 0; x < p.width; ++x) {
         for (var y = 0; y < p.height; ++y) {
             var signedDistance = sdf(p.createVector(x, y));
-            p.stroke(signedDistance % 255, 255, 255);
+            p.stroke(
+                Math.abs(signedDistance * 200) % 255,
+                signedDistance > 0 ? 100 : 50,
+                signedDistance > 0 ? 100 : 50,
+            );
             p.line(x, y, x, y); // This is weird but Firefox does not like p.point
         }
     }
@@ -65,30 +69,34 @@ var dot = (vecA, vecB) => {
 };
 
 # %% [markdown]
-Now let's define a line segment
+Now let's define a line segment.
 
 # %%--- [javascript]
 # properties:
 #   run_on_load: true
 # ---%%
-var createSegment = (p, vecA, vecB) => {
-    return (vecP) => {
-        var vecPA = vecP.copy().sub(vecA);
-        var vecBA = vecB.copy().sub(vecA);
-        var height = p.constrain(
-            dot(vecPA, vecBA) / dot(vecBA, vecBA),
-            0.0,
-            1.0,
-        );
-        return vecPA.sub(vecBA.mult(height)).mag();
+var createUnitSegment = (p) => {
+    return (vec) => {
+        var unitVector = p.createVector(1, 0);
+        var width = p.constrain(vec.x, 0.0, 1.0);
+        return -Math.sign(vec.y) * vec.copy().sub(unitVector.mult(width)).mag();
     };
 };
 
 var lineSegmentSketch = (p) => {
-    p.setup = createSetupFunction(
-        p,
-        createSegment(p, p.createVector(100, 150), p.createVector(200, 150)),
-    );
+    var scale = (vec) => {
+        return p.createVector(
+            p.map(vec.x, 0, p.width, -2, 2),
+            p.map(vec.y, 0, p.height, -2, 2),
+        );
+    };
+
+    var unitSegment = createUnitSegment(p);
+
+    p.setup = createSetupFunction(p, (vec) => unitSegment(scale(vec)));
 };
 
 p5WithCleanup(lineSegmentSketch, 'lineSegmentSketch');
+
+# %% [markdown]
+This is an improper sdf, but will become well behaved once we chain line segments to form a closed path.

@@ -1,6 +1,8 @@
 # %% [markdown]
 # Signed distance function for a star
 
+First we need a way to render an sdf in a P5 sketch
+
 # %%--- [javascript]
 # properties:
 #   top_hidden: true
@@ -38,10 +40,37 @@ var p5WithCleanup = (sketch, text) => {
 # ---%%
 await import('/p5-notebook/lib/p5/lib/p5.js');
 
+var createSetupFunction = (p, sdf) => () => {
+    p.createCanvas(300, 300);
+    p.colorMode(p.HSB);
+
+    for (var x = 0; x < p.width; ++x) {
+        for (var y = 0; y < p.height; ++y) {
+            var signedDistance = sdf(p.createVector(x, y));
+            p.stroke(signedDistance % 255, 255, 255);
+            p.line(x, y, x, y); // This is weird but Firefox does not like p.point
+        }
+    }
+};
+
+# %% [markdown]
+Also define the dot product of a Vector
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
 var dot = (vecA, vecB) => {
     return vecA.x * vecB.x + vecA.y * vecB.y;
 };
 
+# %% [markdown]
+Now let's define a line segment
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
 var createSegment = (p, vecA, vecB) => {
     return (vecP) => {
         var vecPA = vecP.copy().sub(vecA);
@@ -56,24 +85,10 @@ var createSegment = (p, vecA, vecB) => {
 };
 
 var lineSegmentSketch = (p) => {
-    p.setup = () => {
-        p.createCanvas(300, 300);
-        p.colorMode(p.HSB);
-
-        var segment = createSegment(
-            p,
-            p.createVector(100, 150),
-            p.createVector(200, 150),
-        );
-
-        for (var x = 0; x < p.width; ++x) {
-            for (var y = 0; y < p.height; ++y) {
-                var signedDistance = segment(p.createVector(x, y));
-                p.stroke(signedDistance % 255, 255, 255);
-                p.line(x, y, x, y); // This is weird but Firefox does not like p.point
-            }
-        }
-    };
+    p.setup = createSetupFunction(
+        p,
+        createSegment(p, p.createVector(100, 150), p.createVector(200, 150)),
+    );
 };
 
 p5WithCleanup(lineSegmentSketch, 'lineSegmentSketch');

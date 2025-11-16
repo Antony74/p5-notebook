@@ -40,17 +40,13 @@ var p5WithCleanup = (sketch, text) => {
 # ---%%
 await import('/p5-notebook/lib/p5/lib/p5.js');
 
-var createVector = () => {
+var notImplemented = () => {
     throw new Error('Not implemented');
 };
 
-var map = () => {
-    throw new Error('Not implemented');
-};
-
-var constrain = () => {
-    throw new Error('Not implemented');
-};
+var createVector = notImplemented;
+var map = notImplemented;
+var constrain = notImplemented;
 
 var createSetupFunction = (p, sdf) => () => {
     createVector = p.createVector;

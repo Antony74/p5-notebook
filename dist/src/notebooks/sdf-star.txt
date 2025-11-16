@@ -60,7 +60,7 @@ var createSetupFunction = (p, sdf) => () => {
         for (var y = 0; y < p.height; ++y) {
             var signedDistance = sdf(p.createVector(x, y));
             p.stroke(
-                Math.abs(signedDistance * 200) % 255,
+                Math.abs(signedDistance * 20) % 255,
                 signedDistance > 0 ? 100 : 50,
                 signedDistance > 0 ? 100 : 50,
             );
@@ -82,14 +82,14 @@ var unitSegment = (vec) => {
     return -Math.sign(vec.y) * vec.copy().sub(unitVector.mult(width)).mag();
 };
 
+var createScale = (sdf, factor) => (vec) => {
+    var signedDistance = sdf(vec.copy().mult(factor));
+    return signedDistance / factor;
+};
+
 var lineSegmentSketch = (p) => {
-    var scale = (vec) => {
-        return createVector(
-            map(vec.x, 0, p.width, -2, 2),
-            map(vec.y, 0, p.height, -2, 2),
-        );
-    };
-    p.setup = createSetupFunction(p, (vec) => unitSegment(scale(vec)));
+    var sdf = createScale(unitSegment, 0.01);
+    p.setup = createSetupFunction(p, sdf);
 };
 
 p5WithCleanup(lineSegmentSketch, 'lineSegmentSketch');

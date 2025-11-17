@@ -185,7 +185,7 @@ var triangleSketch = (p) => {
 p5WithCleanup(triangleSketch, 'triangleSketch');
 
 # %% [markdown]
-Add a second triangle at 180 degrees (PI radians), and we have our star. And let's [borrow](https://www.reddit.com/r/generative/s/faEkyjmd8e) a better color scheme.
+Add a second triangle at 180 degrees (PI radians), and we have our star.
 
 # %%--- [javascript]
 # properties:
@@ -194,6 +194,24 @@ Add a second triangle at 180 degrees (PI radians), and we have our star. And let
 var invertedTriangle = createRotate(regularUnitTriangle, Math.PI);
 var star = (vec) => Math.min(regularUnitTriangle(vec), invertedTriangle(vec));
 
+var starSketch = (p) => {
+    var scaleFactor = 100;
+    var sdf = createTranslate(
+        createScale(star, scaleFactor),
+        p.createVector(150, 150),
+    );
+    p.setup = createSetupFunction(p, sdf, mapToRainbowColor);
+};
+
+p5WithCleanup(starSketch, 'starSketch');
+
+# %% [markdown]
+And let's [borrow](https://www.reddit.com/r/generative/s/faEkyjmd8e) a better color scheme.
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
 var factor = 1.4;
 
 var mapToColor = (p, signedDistance, x, y) => {
@@ -215,7 +233,7 @@ var mapToColor = (p, signedDistance, x, y) => {
     }
 };
 
-var starSketch = (p) => {
+var starSketch2 = (p) => {
     var scaleFactor = 50 * factor;
     var sdf = createTranslate(
         createRotate(createScale(star, scaleFactor), Math.PI / 12),
@@ -225,4 +243,4 @@ var starSketch = (p) => {
     p.setup = createSetupFunction(p, sdf, mapToColor);
 };
 
-p5WithCleanup(starSketch, 'starSketch');
+p5WithCleanup(starSketch2, 'starSketch2');

@@ -81,7 +81,6 @@ Now we need a way to render an sdf in a p5 sketch
 # ---%%
 var createSetupFunction = (p, sdf, mapToColor) => () => {
     createVector = p.createVector;
-    map = p.map;
     constrain = p.constrain;
 
     p.createCanvas(300, 300);

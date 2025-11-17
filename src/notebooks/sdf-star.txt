@@ -1,7 +1,7 @@
 # %% [markdown]
 # Signed distance function for a star
 
-Signed distance functions (sdf) are an extremely powerful and flexible way of thinking about objects and the zones around them in two or three dimensions. They're also ridiculously easy once a certain amount of groundwork has been laid. But as they may also represent something of a paradim shift, it's worth spending a little time getting your head around them. And not exclusively from the resource I'm providing here - I'm still learning myself!
+Signed distance functions (sdf) are an extremely powerful and flexible way of thinking about objects and the zones around them in two or three dimensions. They're also ridiculously easy once a certain amount of groundwork has been laid. But as they may also represent something of a paradigm shift, it's worth spending a little time getting your head around them. And not exclusively from the resource I'm providing here - I'm still learning myself!
 
 My introduction to sdf was this YouTube video: [Building Shapes with Math | An introduction to signed distance functions](https://www.youtube.com/watch?v=Ow9JDz_qYpw)
 
@@ -10,6 +10,8 @@ Because we perform the same calculation at every point in space we consider, thi
 To move to the GPU, consider learning GLSL (the OpenGL Shading Language), which will get your content on the web, thus complimenting JavaScript nicely. Here's an introduction to using sdf in GLSL
 
 [https://iquilezles.org/articles/distfunctions2d/](https://iquilezles.org/articles/distfunctions2d/)
+
+It has a more efficient function for a six pointed star, but the derivation is not clear, so I'm going to construct one from line segments.
 
 On your local system, [gpu.js](https://www.npmjs.com/package/gpu.js) is also a very interesting option, as it automatically transpiles simple JavaScript functions into shader language and compiles them so they run on your GPU.
 
@@ -95,20 +97,6 @@ var createSetupFunction = (p, sdf, mapToColor) => () => {
 };
 
 # %% [markdown]
-Now let's define a line segment.
-
-# %%--- [javascript]
-# properties:
-#   run_on_load: true
-# ---%%
-var unitSegment = (vec) => {
-    var unitVector = createVector(1, 0);
-    var width = constrain(vec.x, 0.0, 1.0);
-    var result = vec.copy().sub(unitVector.mult(width)).mag();
-    return vec.y >= 0 ? -result : result;
-};
-
-# %% [markdown]
 Define some simple familiar transformations - scale, translate, and rotate - on an sdf function. Actually we have to apply the inverse transformation to the sdf to get the desired result. These are also known as affine transformations, and can be elegantly and efficient represented by a matrix. I intentionally haven't captured the fully generality here. In particular I want all scale operations have a 1:1 aspect ratio so that scaling the signed distance is trivial.
 
 # %%--- [javascript]
@@ -124,11 +112,36 @@ var createTranslate = (sdf, translationVec) => (vec) => {
     return sdf(vec.copy().sub(translationVec));
 };
 
+var createRotate =
+    (sdf, angle) =>
+    ({ x, y }) => {
+        return sdf(
+            createVector(
+                x * Math.cos(angle) - y * Math.sin(angle),
+                x * Math.sin(angle) + y * Math.cos(angle),
+            ),
+        );
+    };
+
+# %% [markdown]
+Now let's define a line segment.
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var unitSegment = (vec) => {
+    var unitVector = createVector(1, 0);
+    var width = constrain(vec.x, -0.5, 0.5);
+    var result = vec.copy().sub(unitVector.mult(width)).mag();
+    return vec.y >= 0 ? -result : result;
+};
+
 var lineSegmentSketch = (p) => {
     var scaleFactor = 100;
     var sdf = createTranslate(
         createScale(unitSegment, scaleFactor),
-        p.createVector(100, 150),
+        p.createVector(150, 150),
     );
     p.setup = createSetupFunction(p, sdf, mapToRainbowColor);
 };
@@ -136,4 +149,36 @@ var lineSegmentSketch = (p) => {
 p5WithCleanup(lineSegmentSketch, 'lineSegmentSketch');
 
 # %% [markdown]
-This is an improper sdf, but will become well behaved once we chain line segments to form a closed polygon.
+This is an improper sdf, but will become well behaved once we chain line segments to form a closed polygon. So let's go ahead and define a triangle.
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var regularUnitTriangle = (vec) => {
+    var angle = (2 * Math.PI) / 3;
+
+    var sides = [0, 1, 2].map((index) => {
+        var sdf = createTranslate(
+            createRotate(unitSegment, index * angle + Math.PI),
+            createVector(0, 0.5).rotate(-index * angle),
+        );
+        return sdf(vec);
+    });
+
+    return sides.reduce(
+        (acc, value) => (Math.abs(acc) < Math.abs(value) ? acc : value),
+        Number.MAX_SAFE_INTEGER,
+    );
+};
+
+var triangleSketch = (p) => {
+    var scaleFactor = 100;
+    var sdf = createTranslate(
+        createScale(regularUnitTriangle, scaleFactor),
+        p.createVector(150, 150),
+    );
+    p.setup = createSetupFunction(p, sdf, mapToRainbowColor);
+};
+
+p5WithCleanup(triangleSketch, 'triangleSketch');

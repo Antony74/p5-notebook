@@ -90,7 +90,7 @@ var createSetupFunction = (p, sdf, mapToColor) => () => {
     for (var x = 0; x < p.width; ++x) {
         for (var y = 0; y < p.height; ++y) {
             var signedDistance = sdf(p.createVector(x, y));
-            p.stroke(mapToColor(p, signedDistance));
+            p.stroke(mapToColor(p, signedDistance, x, y));
             p.line(x, y, x, y); // This is weird but Firefox does not like p.point
         }
     }
@@ -171,13 +171,58 @@ var createRegularUnitTriangle = () => {
     };
 };
 
+var regularUnitTriangle = createRegularUnitTriangle();
+
 var triangleSketch = (p) => {
     var scaleFactor = 100;
     var sdf = createTranslate(
-        createScale(createRegularUnitTriangle(), scaleFactor),
+        createScale(regularUnitTriangle, scaleFactor),
         p.createVector(150, 150),
     );
     p.setup = createSetupFunction(p, sdf, mapToRainbowColor);
 };
 
 p5WithCleanup(triangleSketch, 'triangleSketch');
+
+# %% [markdown]
+Add a second triangle at 180 degrees (PI radians), and we have our star. And let's [borrow](https://www.reddit.com/r/generative/s/faEkyjmd8e) a better color scheme.
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var invertedTriangle = createRotate(regularUnitTriangle, Math.PI);
+var star = (vec) => Math.min(regularUnitTriangle(vec), invertedTriangle(vec));
+
+var factor = 1.4;
+
+var mapToColor = (p, signedDistance, x, y) => {
+    signedDistance /= factor;
+
+    p.colorMode(p.RGB);
+    if (p.noise(x, y) > 0.5) {
+        return p.color(0, 0, 0);
+    }
+
+    if (signedDistance > 10 && signedDistance < 25) {
+        return p.color(0, 0, 255);
+    } else if (signedDistance > 40 && signedDistance < 50) {
+        return p.color(255, 0, 0);
+    } else if (signedDistance > 60 && signedDistance < 70) {
+        return p.color(0, 0, 255);
+    } else {
+        return p.color(0, 0, 0);
+    }
+};
+
+var starSketch = (p) => {
+    var scaleFactor = 50 * factor;
+    var sdf = createTranslate(
+        createRotate(createScale(star, scaleFactor), Math.PI / 12),
+        p.createVector(150, 150),
+    );
+
+    p.setup = createSetupFunction(p, sdf, mapToColor);
+};
+
+p5WithCleanup(starSketch, 'starSketch');

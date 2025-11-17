@@ -1,6 +1,18 @@
 # %% [markdown]
 # Signed distance function for a star
 
+Signed distance functions (sdf) are an extremely powerful and flexible way of thinking about objects and the zones around them in two or three dimensions. They're also ridiculously easy once a certain amount of groundwork has been laid. But as they may also represent something of a paradim shift, it's worth spending a little time getting your head around them. And not exclusively from the resource I'm providing here - I'm still learning myself!
+
+Because we perform the same calculation at every point in space we consider, this parallelizes incredibly well, and can run on your GPU (the graphics processing unit on your computer's graphics card). But that's not what I'm going to do here. This is just going to be plain p5 JavaScript running on the CPU.
+
+To move to the GPU, consider learning GLSL (the OpenGL Shading Language), which will get your content on the web, thus compliementing JavaScript nicely. Here's an introduction to using sdf in GLSL
+
+https://iquilezles.org/articles/distfunctions2d/
+
+On your local system, [gpu.js](https://www.npmjs.com/package/gpu.js) is also a very interesting option, as it automatically transpiles simple JavaScript functions into shader language and compiles them so they run on your GPU.
+
+## My p5 implementation
+
 First we need a way to render an sdf in a p5 sketch
 
 # %%--- [javascript]
@@ -84,8 +96,7 @@ var unitSegment = (vec) => {
 };
 
 # %% [markdown]
-Define some simple familiar transformations - scale, translate, and rotate - on an sdf function. Actually we have to apply the inverse transformation to the sdf to get the desired result. These are also known as affine transformations, and can be elegantly and efficient represented by a matrix. I intentionally haven't captured the fully generality here. In particular I want
-all scale operations have a 1:1 aspect ratio so that scaling the signed distance is trivial.
+Define some simple familiar transformations - scale, translate, and rotate - on an sdf function. Actually we have to apply the inverse transformation to the sdf to get the desired result. These are also known as affine transformations, and can be elegantly and efficient represented by a matrix. I intentionally haven't captured the fully generality here. In particular I want all scale operations have a 1:1 aspect ratio so that scaling the signed distance is trivial.
 
 # %%--- [javascript]
 # properties:

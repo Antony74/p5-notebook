@@ -3,17 +3,19 @@
 
 Signed distance functions (sdf) are an extremely powerful and flexible way of thinking about objects and the zones around them in two or three dimensions. They're also ridiculously easy once a certain amount of groundwork has been laid. But as they may also represent something of a paradim shift, it's worth spending a little time getting your head around them. And not exclusively from the resource I'm providing here - I'm still learning myself!
 
+My introduction to sdf was this YouTube video: [Building Shapes with Math | An introduction to signed distance functions](https://www.youtube.com/watch?v=Ow9JDz_qYpw)
+
 Because we perform the same calculation at every point in space we consider, this parallelizes incredibly well, and can run on your GPU (the graphics processing unit on your computer's graphics card). But that's not what I'm going to do here. This is just going to be plain p5 JavaScript running on the CPU.
 
-To move to the GPU, consider learning GLSL (the OpenGL Shading Language), which will get your content on the web, thus compliementing JavaScript nicely. Here's an introduction to using sdf in GLSL
+To move to the GPU, consider learning GLSL (the OpenGL Shading Language), which will get your content on the web, thus complimenting JavaScript nicely. Here's an introduction to using sdf in GLSL
 
-https://iquilezles.org/articles/distfunctions2d/
+[https://iquilezles.org/articles/distfunctions2d/](https://iquilezles.org/articles/distfunctions2d/)
 
 On your local system, [gpu.js](https://www.npmjs.com/package/gpu.js) is also a very interesting option, as it automatically transpiles simple JavaScript functions into shader language and compiles them so they run on your GPU.
 
 ## My p5 implementation
 
-First we need a way to render an sdf in a p5 sketch
+First we need a bit of setup, and a simple color scheme to help us visualize an sdf.
 
 # %%--- [javascript]
 # properties:
@@ -60,7 +62,22 @@ var createVector = notImplemented;
 var map = notImplemented;
 var constrain = notImplemented;
 
-var createSetupFunction = (p, sdf) => () => {
+var mapToRainbowColor = (p, signedDistance) => {
+    return p.color(
+        Math.abs(signedDistance * 20) % 255,
+        signedDistance > 0 ? 100 : 50,
+        signedDistance > 0 ? 100 : 50,
+    );
+};
+
+# %% [markdown]
+Now we need a way to render an sdf in a p5 sketch
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var createSetupFunction = (p, sdf, mapToColor) => () => {
     createVector = p.createVector;
     map = p.map;
     constrain = p.constrain;
@@ -71,11 +88,7 @@ var createSetupFunction = (p, sdf) => () => {
     for (var x = 0; x < p.width; ++x) {
         for (var y = 0; y < p.height; ++y) {
             var signedDistance = sdf(p.createVector(x, y));
-            p.stroke(
-                Math.abs(signedDistance * 20) % 255,
-                signedDistance > 0 ? 100 : 50,
-                signedDistance > 0 ? 100 : 50,
-            );
+            p.stroke(mapToColor(p, signedDistance));
             p.line(x, y, x, y); // This is weird but Firefox does not like p.point
         }
     }
@@ -117,7 +130,7 @@ var lineSegmentSketch = (p) => {
         createScale(unitSegment, scaleFactor),
         p.createVector(100, 150),
     );
-    p.setup = createSetupFunction(p, sdf);
+    p.setup = createSetupFunction(p, sdf, mapToRainbowColor);
 };
 
 p5WithCleanup(lineSegmentSketch, 'lineSegmentSketch');

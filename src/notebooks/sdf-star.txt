@@ -1,7 +1,7 @@
 # %% [markdown]
 # Signed distance function for a star
 
-First we need a way to render an sdf in a P5 sketch
+First we need a way to render an sdf in a p5 sketch
 
 # %%--- [javascript]
 # properties:
@@ -79,16 +79,32 @@ Now let's define a line segment.
 var unitSegment = (vec) => {
     var unitVector = createVector(1, 0);
     var width = constrain(vec.x, 0.0, 1.0);
-    return -Math.sign(vec.y) * vec.copy().sub(unitVector.mult(width)).mag();
+    var result = vec.copy().sub(unitVector.mult(width)).mag();
+    return vec.y >= 0 ? -result : result;
 };
 
+# %% [markdown]
+Define some simple familiar transformations - scale, translate, and rotate - on an sdf function. Actually we have to apply the inverse transformation to the sdf to get the desired result. These are also known as affine transformations, and can be elegantly and efficient represented by a matrix. I intentionally haven't captured the fully generality here. In particular I want all scale operations have a 1:1 aspect ratio so that scaling the signed distance is trivial.
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
 var createScale = (sdf, factor) => (vec) => {
-    var signedDistance = sdf(vec.copy().mult(factor));
-    return signedDistance / factor;
+    var signedDistance = sdf(vec.copy().div(factor));
+    return signedDistance * factor;
+};
+
+var createTranslate = (sdf, translationVec) => (vec) => {
+    return sdf(vec.copy().sub(translationVec));
 };
 
 var lineSegmentSketch = (p) => {
-    var sdf = createScale(unitSegment, 0.01);
+    var scaleFactor = 100;
+    var sdf = createTranslate(
+        createScale(unitSegment, scaleFactor),
+        p.createVector(100, 150),
+    );
     p.setup = createSetupFunction(p, sdf);
 };
 

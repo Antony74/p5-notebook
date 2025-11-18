@@ -65,27 +65,6 @@ var mapToRainbowColor = (p, signedDistance) => {
 };
 
 # %% [markdown]
-Now we need a way to render an sdf in a p5 sketch
-
-# %%--- [javascript]
-# properties:
-#   run_on_load: true
-# ---%%
-var createSetupFunction = (p, sdf, mapToColor) => () => {
-    p.createCanvas(300, 300);
-    p.colorMode(p.HSB);
-
-    for (var x = 0; x < p.width; ++x) {
-        for (var y = 0; y < p.height; ++y) {
-            var signedDistance = sdf(p.createVector(x, y));
-            p.set(x, y, mapToColor(p, signedDistance, x, y));
-        }
-    }
-
-    p.updatePixels();
-};
-
-# %% [markdown]
 Define some simple familiar transformations - scale, translate, and rotate - on an sdf function. Actually we have to apply the inverse transformation to the sdf to get the desired result. These are also known as affine transformations, and can be elegantly and efficient represented by a matrix. I intentionally haven't captured the fully generality here. In particular I want all scale operations have a 1:1 aspect ratio so that scaling the signed distance is trivial.
 
 # %%--- [javascript]
@@ -111,6 +90,32 @@ var createRotate = (p, sdf, angle) => {
 };
 
 # %% [markdown]
+Now we need a way to render an sdf in a p5 sketch
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var createSetupFunction = (p, sdf, mapToColor, scaleFactor) => () => {
+    p.createCanvas(300, 300);
+    p.colorMode(p.HSB);
+
+    var transformedSdf = createTranslate(
+        createScale(sdf, scaleFactor),
+        p.createVector(150, 150),
+    );
+
+    for (var x = 0; x < p.width; ++x) {
+        for (var y = 0; y < p.height; ++y) {
+            var signedDistance = transformedSdf(p.createVector(x, y));
+            p.set(x, y, mapToColor(p, signedDistance, x, y));
+        }
+    }
+
+    p.updatePixels();
+};
+
+# %% [markdown]
 Now let's define a line segment.
 
 # %%--- [javascript]
@@ -126,11 +131,8 @@ var createUnitSegment = (p) => (vec) => {
 
 var lineSegmentSketch = (p) => {
     var scaleFactor = 100;
-    var sdf = createTranslate(
-        createScale(createUnitSegment(p), scaleFactor),
-        p.createVector(150, 150),
-    );
-    p.setup = createSetupFunction(p, sdf, mapToRainbowColor);
+    var sdf = createUnitSegment(p);
+    p.setup = createSetupFunction(p, sdf, mapToRainbowColor, scaleFactor);
 };
 
 p5WithCleanup(lineSegmentSketch, 'lineSegmentSketch');
@@ -162,13 +164,9 @@ var createRegularUnitTriangle = (p) => {
 };
 
 var triangleSketch = (p) => {
-    var regularUnitTriangle = createRegularUnitTriangle(p);
+    var sdf = createRegularUnitTriangle(p);
     var scaleFactor = 100;
-    var sdf = createTranslate(
-        createScale(regularUnitTriangle, scaleFactor),
-        p.createVector(150, 150),
-    );
-    p.setup = createSetupFunction(p, sdf, mapToRainbowColor);
+    p.setup = createSetupFunction(p, sdf, mapToRainbowColor, scaleFactor);
 };
 
 p5WithCleanup(triangleSketch, 'triangleSketch');
@@ -188,13 +186,9 @@ var createStar = (p) => {
 };
 
 var starSketch = (p) => {
-    var star = createStar(p);
+    var sdf = createStar(p);
     var scaleFactor = 100;
-    var sdf = createTranslate(
-        createScale(star, scaleFactor),
-        p.createVector(150, 150),
-    );
-    p.setup = createSetupFunction(p, sdf, mapToRainbowColor);
+    p.setup = createSetupFunction(p, sdf, mapToRainbowColor, scaleFactor);
 };
 
 p5WithCleanup(starSketch, 'starSketch');
@@ -230,13 +224,8 @@ var mapToColor = (p, signedDistance, x, y) => {
 var starSketch2 = (p) => {
     var star = createStar(p);
     var scaleFactor = 50 * factor;
-
-    var sdf = createTranslate(
-        createRotate(p, createScale(star, scaleFactor), Math.PI / 12),
-        p.createVector(150, 150),
-    );
-
-    p.setup = createSetupFunction(p, sdf, mapToColor);
+    var sdf = createRotate(p, createScale(star, scaleFactor), Math.PI / 12);
+    p.setup = createSetupFunction(p, sdf, mapToColor, 1);
 };
 
 p5WithCleanup(starSketch2, 'starSketch2');

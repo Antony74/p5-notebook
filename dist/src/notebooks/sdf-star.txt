@@ -11,7 +11,7 @@ To move to the GPU, consider learning GLSL (the OpenGL Shading Language), which 
 
 [https://iquilezles.org/articles/distfunctions2d/](https://iquilezles.org/articles/distfunctions2d/)
 
-It has a more efficient function for a six pointed star, but the derivation is not clear, so I'm going to construct one from line segments.
+It has a more efficient function for a six pointed star, but the derivation is not clear, and I'd like a more reusable approach to construction, so I'm going to construct one from line segments.
 
 On your local system, [gpu.js](https://www.npmjs.com/package/gpu.js) is also a very interesting option, as it automatically transpiles simple JavaScript functions into shader language and compiles them so they run on your GPU.
 
@@ -56,14 +56,6 @@ var p5WithCleanup = (sketch, text) => {
 # ---%%
 await import('/p5-notebook/lib/p5/lib/p5.js');
 
-var notImplemented = () => {
-    throw new Error('Not implemented');
-};
-
-var createVector = notImplemented;
-var map = notImplemented;
-var constrain = notImplemented;
-
 var mapToRainbowColor = (p, signedDistance) => {
     return p.color(
         Math.abs(signedDistance * 20) % 255,
@@ -80,9 +72,6 @@ Now we need a way to render an sdf in a p5 sketch
 #   run_on_load: true
 # ---%%
 var createSetupFunction = (p, sdf, mapToColor) => () => {
-    createVector = p.createVector;
-    constrain = p.constrain;
-
     p.createCanvas(300, 300);
     p.colorMode(p.HSB);
 
@@ -111,12 +100,12 @@ var createTranslate = (sdf, translationVec) => (vec) => {
     return sdf(vec.copy().sub(translationVec));
 };
 
-var createRotate = (sdf, angle) => {
+var createRotate = (p, sdf, angle) => {
     var cos = Math.cos(angle);
     var sin = Math.sin(angle);
 
     return ({ x, y }) => {
-        return sdf(createVector(x * cos - y * sin, x * sin + y * cos));
+        return sdf(p.createVector(x * cos - y * sin, x * sin + y * cos));
     };
 };
 
@@ -127,9 +116,9 @@ Now let's define a line segment.
 # properties:
 #   run_on_load: true
 # ---%%
-var unitSegment = (vec) => {
-    var unitVector = createVector(1, 0);
-    var width = constrain(vec.x, -0.5, 0.5);
+var createUnitSegment = (p) => (vec) => {
+    var unitVector = p.createVector(1, 0);
+    var width = p.constrain(vec.x, -0.5, 0.5);
     var result = vec.copy().sub(unitVector.mult(width)).mag();
     return vec.y >= 0 ? -result : result;
 };
@@ -137,7 +126,7 @@ var unitSegment = (vec) => {
 var lineSegmentSketch = (p) => {
     var scaleFactor = 100;
     var sdf = createTranslate(
-        createScale(unitSegment, scaleFactor),
+        createScale(createUnitSegment(p), scaleFactor),
         p.createVector(150, 150),
     );
     p.setup = createSetupFunction(p, sdf, mapToRainbowColor);
@@ -152,15 +141,16 @@ This is an improper sdf, but will become well behaved once we chain line segment
 # properties:
 #   run_on_load: true
 # ---%%
-var createRegularUnitTriangle = () => {
+var createRegularUnitTriangle = (p) => {
     var angle = (2 * Math.PI) / 3;
     var height = Math.sqrt(3) / 2;
     var thirdHeight = height / 3;
+    var unitSegment = createUnitSegment(p);
 
     var sdfs = [0, 1, 2].map((index) => {
         return createTranslate(
-            createRotate(unitSegment, index * angle + Math.PI),
-            createVector(0, thirdHeight).rotate(-index * angle),
+            createRotate(p, unitSegment, index * angle + Math.PI),
+            p.createVector(0, thirdHeight).rotate(-index * angle),
         );
     });
 
@@ -170,9 +160,8 @@ var createRegularUnitTriangle = () => {
     };
 };
 
-var regularUnitTriangle = createRegularUnitTriangle();
-
 var triangleSketch = (p) => {
+    var regularUnitTriangle = createRegularUnitTriangle(p);
     var scaleFactor = 100;
     var sdf = createTranslate(
         createScale(regularUnitTriangle, scaleFactor),
@@ -190,10 +179,15 @@ Add a second triangle at 180 degrees (PI radians), and we have our star.
 # properties:
 #   run_on_load: true
 # ---%%
-var invertedTriangle = createRotate(regularUnitTriangle, Math.PI);
-var star = (vec) => Math.min(regularUnitTriangle(vec), invertedTriangle(vec));
+var createStar = (p) => {
+    var triangle = createRegularUnitTriangle(p);
+    var invertedTriangle = createRotate(p, triangle, Math.PI);
+    var star = (vec) => Math.min(triangle(vec), invertedTriangle(vec));
+    return star;
+};
 
 var starSketch = (p) => {
+    var star = createStar(p);
     var scaleFactor = 100;
     var sdf = createTranslate(
         createScale(star, scaleFactor),
@@ -233,9 +227,11 @@ var mapToColor = (p, signedDistance, x, y) => {
 };
 
 var starSketch2 = (p) => {
+    var star = createStar(p);
     var scaleFactor = 50 * factor;
+
     var sdf = createTranslate(
-        createRotate(createScale(star, scaleFactor), Math.PI / 12),
+        createRotate(p, createScale(star, scaleFactor), Math.PI / 12),
         p.createVector(150, 150),
     );
 

@@ -56,8 +56,35 @@ var p5WithCleanup = (sketch, text) => {
 # ---%%
 await import('/p5-notebook/lib/p5/lib/p5.js');
 
-var mapToRainbowColor = (p, signedDistance) => {
-    return p.color(
+var metaballs = (p) => {
+    p.setup = () => {
+        p.createCanvas(300, 300);
+        p.colorMode(p.HSB);
+
+        var balls = [p.createVector(100, 100), p.createVector(200, 200)];
+
+        for (var x = 0; x < p.width; ++x) {
+            for (var y = 0; y < p.height; ++y) {
+                var sum = 0;
+                for (var index = 0; index < balls.length; ++index) {
+                    var ball = balls[index];
+                    sum += 1 / p.dist(ball.x, ball.y, x, y);
+                }
+                p.stroke(p.map(sum, 0, 0.03, 0, 255), 255, 255);
+                p.line(x, y, x, y); // This is weird but Firefox does not like p.point
+            }
+        }
+    };
+};
+
+p5WithCleanup(metaballs, 'metaballs');
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var mapToRainbowStroke = (p, signedDistance) => {
+    p.stroke(
         Math.abs(signedDistance * 20) % 255,
         signedDistance > 0 ? 100 : 50,
         signedDistance > 0 ? 100 : 50,
@@ -71,14 +98,14 @@ Now we need a way to render an sdf in a p5 sketch
 # properties:
 #   run_on_load: true
 # ---%%
-var createSetupFunction = (p, sdf, mapToColor) => () => {
+var createSetupFunction = (p, sdf, mapToStroke) => () => {
     p.createCanvas(300, 300);
     p.colorMode(p.HSB);
 
     for (var x = 0; x < p.width; ++x) {
         for (var y = 0; y < p.height; ++y) {
             var signedDistance = sdf(p.createVector(x, y));
-            p.stroke(mapToColor(p, signedDistance, x, y));
+            mapToStroke(p, signedDistance, x, y);
             p.line(x, y, x, y); // This is weird but Firefox does not like p.point
         }
     }
@@ -129,7 +156,7 @@ var lineSegmentSketch = (p) => {
         createScale(createUnitSegment(p), scaleFactor),
         p.createVector(150, 150),
     );
-    p.setup = createSetupFunction(p, sdf, mapToRainbowColor);
+    p.setup = createSetupFunction(p, sdf, mapToRainbowStroke);
 };
 
 p5WithCleanup(lineSegmentSketch, 'lineSegmentSketch');
@@ -167,7 +194,7 @@ var triangleSketch = (p) => {
         createScale(regularUnitTriangle, scaleFactor),
         p.createVector(150, 150),
     );
-    p.setup = createSetupFunction(p, sdf, mapToRainbowColor);
+    p.setup = createSetupFunction(p, sdf, mapToRainbowStroke);
 };
 
 p5WithCleanup(triangleSketch, 'triangleSketch');
@@ -193,7 +220,7 @@ var starSketch = (p) => {
         createScale(star, scaleFactor),
         p.createVector(150, 150),
     );
-    p.setup = createSetupFunction(p, sdf, mapToRainbowColor);
+    p.setup = createSetupFunction(p, sdf, mapToRainbowStroke);
 };
 
 p5WithCleanup(starSketch, 'starSketch');
@@ -207,22 +234,20 @@ And let's [borrow](https://www.reddit.com/r/generative/s/faEkyjmd8e) a better co
 # ---%%
 var factor = 1.4;
 
-var mapToColor = (p, signedDistance, x, y) => {
+var mapToStroke = (p, signedDistance, x, y) => {
     signedDistance /= factor;
 
     p.colorMode(p.RGB);
     if (p.noise(x, y) > 0.5) {
-        return p.color(0, 0, 0);
-    }
-
-    if (signedDistance > 10 && signedDistance < 25) {
-        return p.color(0, 0, 255);
+        p.stroke(0, 0, 0);
+    } else if (signedDistance > 10 && signedDistance < 25) {
+        p.stroke(0, 0, 255);
     } else if (signedDistance > 40 && signedDistance < 50) {
-        return p.color(255, 0, 0);
+        p.stroke(255, 0, 0);
     } else if (signedDistance > 60 && signedDistance < 70) {
-        return p.color(0, 0, 255);
+        p.stroke(0, 0, 255);
     } else {
-        return p.color(0, 0, 0);
+        p.stroke(0, 0, 0);
     }
 };
 
@@ -235,7 +260,7 @@ var starSketch2 = (p) => {
         p.createVector(150, 150),
     );
 
-    p.setup = createSetupFunction(p, sdf, mapToColor);
+    p.setup = createSetupFunction(p, sdf, mapToStroke);
 };
 
 p5WithCleanup(starSketch2, 'starSketch2');

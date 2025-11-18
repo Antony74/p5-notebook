@@ -78,10 +78,11 @@ var createSetupFunction = (p, sdf, mapToColor) => () => {
     for (var x = 0; x < p.width; ++x) {
         for (var y = 0; y < p.height; ++y) {
             var signedDistance = sdf(p.createVector(x, y));
-            p.stroke(mapToColor(p, signedDistance, x, y));
-            p.line(x, y, x, y); // This is weird but Firefox does not like p.point
+            p.set(x, y, mapToColor(p, signedDistance, x, y));
         }
     }
+
+    p.updatePixels();
 };
 
 # %% [markdown]

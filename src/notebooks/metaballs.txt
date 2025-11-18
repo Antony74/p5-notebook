@@ -42,7 +42,6 @@ var metaballs = (p) => {
     p.setup = () => {
         p.createCanvas(300, 300);
         p.colorMode(p.HSB);
-        p.background(0, 255, 255);
 
         var balls = [p.createVector(100, 100), p.createVector(200, 200)];
 
@@ -53,10 +52,11 @@ var metaballs = (p) => {
                     var ball = balls[index];
                     sum += 1 / p.dist(ball.x, ball.y, x, y);
                 }
-                p.stroke(p.map(sum, 0, 0.03, 0, 255), 255, 255);
-                //                p.line(x, y, x, y); // This is weird but Firefox does not like p.point
+                p.set(x, y, p.color(p.map(sum, 0, 0.03, 0, 255), 255, 255));
             }
         }
+
+        p.updatePixels();
     };
 };
 

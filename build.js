@@ -9,36 +9,40 @@ const { parseNotebook, spellcheckMarkdown } = require('./parseNotebook');
 
 const notebooks = [
     {
-        title: 'In praise of the map function',
-        fileTitle: 'in-praise-of-the-map-function',
+        title: `In praise of the map function`,
+        fileTitle: `in-praise-of-the-map-function`,
     },
     {
-        title: 'Fractal curves with segmentedMap',
-        fileTitle: 'fractal-curves',
+        title: `Fractal curves with segmentedMap`,
+        fileTitle: `fractal-curves`,
     },
     {
-        title: 'Interpolate mitosis',
-        fileTitle: 'interpolate-mitosis',
+        title: `Interpolate mitosis`,
+        fileTitle: `interpolate-mitosis`,
     },
     {
-        title: 'Tic-tac-toe',
-        fileTitle: 'tic-tac-toe',
+        title: `Tic-tac-toe`,
+        fileTitle: `tic-tac-toe`,
     },
     {
-        title: 'Visit all pixels apparently randomly',
-        fileTitle: 'visit-all-pixels-apparently-randomly',
+        title: `Visit all pixels apparently randomly`,
+        fileTitle: `visit-all-pixels-apparently-randomly`,
     },
     {
-        title: 'Mandelbrot',
-        fileTitle: 'mandelbrot',
+        title: `Mandelbrot`,
+        fileTitle: `mandelbrot`,
     },
     {
-        title: 'Metaballs',
-        fileTitle: 'metaballs',
+        title: `Metaballs`,
+        fileTitle: `metaballs`,
     },
     {
-        title: 'Signed distance function for a star',
-        fileTitle: 'sdf-star',
+        title: `Signed distance function for a star`,
+        fileTitle: `sdf-star`,
+    },
+    {
+        title: `Write 'P5' calligraphy style`,
+        fileTitle: `calligraphy`,
     },
 ];
 

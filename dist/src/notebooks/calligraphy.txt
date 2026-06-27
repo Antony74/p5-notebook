@@ -1,0 +1,77 @@
+# %% [markdown]
+# Write 'P5' calligraphy style
+
+Placeholder / work in progress
+
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   run_on_load: true
+# ---%%
+var p5WithCleanup = (sketch, text) => {
+    if (!window.sketches) {
+        window.sketches = {};
+    }
+
+    if (window.sketches[text]) {
+        window.sketches[text].remove();
+    }
+
+    var matchedElements = Array.from(document.querySelectorAll('.cell-bottom'));
+
+    var matchedElement = matchedElements.find(
+        (elm) => elm.parentElement.textContent.split(text).length > 1,
+    );
+
+    if (!matchedElement) {
+        throw new Error(`p5WithCleanup: text not found '${text}'`);
+    }
+
+    var p5Instance = new p5(sketch, matchedElement);
+    window.sketches[text] = p5Instance;
+    return p5Instance;
+};
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+await import('/p5-notebook/lib/p5/lib/p5.js');
+
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
+var calligraphySketch = (p) => {
+    p.setup = () => {
+        p.createCanvas(100, 100);
+
+        p.background(200);
+
+        // Set the coordinates for the curve's anchor and control points.
+        let x1 = 85;
+        let x2 = 10;
+        let x4 = 15;
+        let y1 = 20;
+        let y2 = 10;
+        let y4 = 80;
+
+        // Style the curve.
+        p.noFill();
+
+        // Draw the curve.
+        p.bezier(x1, y1, x2, y2, x2, y2, x4, y4);
+
+        // Draw circles along the curve's path.
+        p.fill(255);
+
+        p.circle(x1, y1, 5);
+        p.circle(x2, y2, 5);
+        p.circle(x4, y4, 5);
+    };
+};
+
+p5WithCleanup(calligraphySketch, 'calligraphySketch');
+
+# %% [markdown]
+Blah-blah blah-blah blah

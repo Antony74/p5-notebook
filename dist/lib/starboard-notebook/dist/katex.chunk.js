@@ -1,3 +1,2 @@
-(self.webpackChunkstarboard_notebook=self.webpackChunkstarboard_notebook||[]).push([["katex"],{"./src/components/helpers/katexModule.ts":(e,a,o)=>{o.r(a),o.d(a,{katex:()=>s.a});var t=o("../starboard-rich-editor/node_modules/katex/dist/katex.js"),s=o.n(t)}}]);//# sourceMappingURL=katex.chunk.js.map
-
+(()=>{"use strict";(self.webpackChunkstarboard_notebook=self.webpackChunkstarboard_notebook||[]).push([["katex"],{"./src/components/helpers/katexModule.ts":(e,t,a)=>{a.r(t),a.d(t,{katex:()=>s.a});var o=a("../starboard-rich-editor/node_modules/katex/dist/katex.js"),s=a.n(o)}}])})();
 //# sourceMappingURL=katex.chunk.js.map

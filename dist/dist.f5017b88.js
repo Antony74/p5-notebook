@@ -2017,4 +2017,4 @@ $$`}});class o7 extends rP(){get name(){return"math_inline"}get schema(){return{
         </div>
       </div>
     `}};sg([ew({type:Object})],sy.prototype,"config",2),sg([ej(".cells-container")],sy.prototype,"cellsParentElement",2),sg([ej("#starboard-source-modal")],sy.prototype,"sourceModalElement",2),sy=sg([eC("starboard-notebook")],sy),window.html=Y,window.svg=Q,window.lit=h;let sb=document.createElement("base");sb.target="_parent",document.head.append(sb);let s_=new sy;document.body.append(s_)})(),c=l.O(c)})();
-//# sourceMappingURL=starboard-notebook.js.map
+//# sourceMappingURL=dist.f5017b88.js.map

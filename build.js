@@ -5,7 +5,7 @@ const mustache = require('mustache');
 const prettier = require('prettier');
 
 const { copyLibs } = require('./copyLibs');
-const { parseNotebook, spellcheckMarkdown } = require('./parseNotebook');
+const { parseNotebook } = require('./parseNotebook');
 
 const notebooks = [
     {
@@ -72,14 +72,6 @@ const build = async () => {
 
             const textArray = await Promise.all(
                 parseNotebook(text).map(async (section) => {
-                    //
-                    // Spellcheck markdown sections of notebook
-                    //
-
-                    if (section.type === 'markdown') {
-                        spellcheckMarkdown(section.text);
-                    }
-
                     //
                     // Run prettier on JavaScript and Markdown sections of the notebook
                     //

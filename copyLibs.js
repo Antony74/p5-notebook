@@ -19,7 +19,7 @@ const copyDir = async (src, dest) => {
                     );
 
                     const json = css.parse(cssText);
-                    
+
                     json.stylesheet.rules.forEach((rule) => {
                         if (rule.type === 'font-face') {
                             for (n = 0; n < rule.declarations.length; ++n) {

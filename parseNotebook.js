@@ -31,5 +31,4 @@ const parseNotebook = (notebookText) => {
     return output;
 };
 
-
 module.exports = { parseNotebook };

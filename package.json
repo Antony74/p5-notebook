@@ -17,7 +17,7 @@
     "dependencies": {
         "coi-serviceworker": "^0.1.7",
         "github-fork-ribbon-css": "^0.2.3",
-        "p5": "1.7.0",
+        "p5": "^1.11.13",
         "starboard-notebook": "^0.15.7"
     },
     "devDependencies": {
